@@ -104,27 +104,27 @@ public:
 	typedef CircularListIterator< CircularListNode<DataType>, DataType > iterator;
 
 public:
-	CircularList<DataType>(){};
-	CircularList<DataType>(int n);
-	CircularList<DataType>(int n, DataType element);
-	CircularList<DataType>(const CircularList<DataType>& list);
-	~CircularList<DataType>();
-	CircularList<DataType>& operator =(const CircularList<DataType>& list);
-	void clear();
-	int size()const;
-	bool empty()const;
-	DataType& operator [](int i);
-	DataType operator [](int i)const;
-	int locate(DataType element)const;
-	bool insert(int i, DataType element);
-	bool erase(int i);
-	void push_back(DataType element);
-	void push_front(DataType element);
-	DataType pop_back();
-	DataType pop_front();
-	bool swap(int i, int j);
-	iterator begin()const;
-	iterator tail()const;
+	CircularList<DataType>(){}; // tested
+	CircularList<DataType>(int n); // tested
+	CircularList<DataType>(int n, DataType element); // tested
+	CircularList<DataType>(const CircularList<DataType>& list); // tested
+	~CircularList<DataType>(); // tested
+	CircularList<DataType>& operator =(const CircularList<DataType>& list); // tested
+	void clear(); // tested
+	int size()const; // tested
+	bool empty()const; // tested
+	DataType& operator [](int i); // tested
+	DataType operator [](int i)const; // tested
+	int locate(DataType element)const; // tested
+	void insert(int n, DataType element); // tested
+	bool erase(int n); // tested
+	void push_back(DataType element); // tested
+	void push_front(DataType element); // tested
+	DataType pop_back(); // tested
+	DataType pop_front(); // tested
+	bool swap(int i, int j); // tested
+	iterator begin()const; // tested
+	iterator tail()const; // tested
 };
 
 template<typename DataType>
@@ -182,7 +182,7 @@ CircularList<DataType>::CircularList(const CircularList<DataType>& list)
 {
 	CircularListNode<DataType> *p = head;
 	CircularListNode<DataType> *q = list.head;
-	while(q->link != list.head->link)
+	for(int i = 0; i < list.length; i++)
 	{
 		p->link = new CircularListNode<DataType>(q->link->data);
 		p = p->link;
@@ -195,9 +195,9 @@ CircularList<DataType>::CircularList(const CircularList<DataType>& list)
 template<typename DataType>
 CircularList<DataType>::~CircularList()
 {
-	CircularListNode<DataType> *p = head->link;
 	for(int i = 0; i < length; i++)
 	{
+		CircularListNode<DataType> *p = head->link;
 		head->link = p->link;
 		delete p;
 	}
@@ -209,7 +209,7 @@ CircularList<DataType>& CircularList<DataType>::operator =(const CircularList<Da
 {
 	CircularListNode<DataType> *p = head;
 	CircularListNode<DataType> *q = list.head;
-	while(q->link != list.head->link)
+	for(int i = 0; i < list.length; i++)
 	{
 		p->link = new CircularListNode<DataType>(q->link->data);
 		p = p->link;
@@ -224,12 +224,13 @@ CircularList<DataType>& CircularList<DataType>::operator =(const CircularList<Da
 template<typename DataType>
 void CircularList<DataType>::clear()
 {
-	CircularListNode<DataType> *p = head->link;
 	for(int i = 0; i < length; i++)
 	{
+		CircularListNode<DataType> *p = head->link;
 		head->link = p->link;
 		delete p;
 	}
+	head->link = NULL;
 	length = 0;
 }
 
@@ -254,11 +255,10 @@ DataType& CircularList<DataType>::operator [](int n)
 			 << "Empty list." << endl;
 		exit(-1);
 	}
+	n = n % length;
 	if(n < 0)
 	{
-		cout << "Error in \'DataType& List<DataType>::operator [](int n)\':" << endl
-			 << "Index \'n\' must be positive." << endl;
-		exit(-1);
+		n += length;
 	}
 
 	CircularListNode<DataType> *p = head->link;
@@ -275,11 +275,10 @@ DataType CircularList<DataType>::operator [](int n)const
 			 << "Empty list." << endl;
 		exit(-1);
 	}
+	n = n % length;
 	if(n < 0)
 	{
-		cout << "Error in \'DataType List<DataType>::operator [](int n)const\':" << endl
-			 << "Index \'n\' is out of list range." << endl;
-		exit(-1);
+		n += length;
 	}
 
 	CircularListNode<DataType> *p = head->link;
@@ -302,13 +301,18 @@ int CircularList<DataType>::locate(DataType element)const
 }
 
 template<typename DataType>
-bool CircularList<DataType>::insert(int n, DataType element)
+void CircularList<DataType>::insert(int n, DataType element)
 {
+	bool flag = false;
+	int N = n % length;
+	if(n != 0 && N == 0)
+	{
+		flag = true;
+	}
+	n = N;
 	if(n < 0)
 	{
-		cout << "Warning in bool List<DataType>::insert(int n, DataType)" << endl
-			 << "\'n\' must be positive. Nothing has been done." << endl;
-		return false;
+		n += length;
 	}
 
 	CircularListNode<DataType> *p = head;
@@ -318,16 +322,28 @@ bool CircularList<DataType>::insert(int n, DataType element)
 		p = p->link;
 		p->link = p;
 		length++;
-		return true;
+		return;
 	}
 
+	CircularListNode<DataType> *rear = head;
 	for(int i = 0; i < n; i++, p = p->link){}
+	for(int i = 0; i < length; i++, rear = rear->link){}
+
+	if(flag)
+	{
+		rear->link = new CircularListNode<DataType>(element);
+		rear = rear->link;
+		rear->link = head->link;
+		length++;
+		return;
+	}
+
 	CircularListNode<DataType> *q = p->link;
 	p->link = new CircularListNode<DataType>(element);
 	p = p->link;
 	p->link = q;
+	rear->link = head->link;
 	length++;
-	return true;
 }
 
 template<typename DataType>
@@ -339,11 +355,10 @@ bool CircularList<DataType>::erase(int n)
 			 << "Empty list. Nothing has been done." << endl;
 		return false;
 	}
+	n = n % length;
 	if(n < 0)
 	{
-		cout << "Warning in bool List<DataType>::erase(int n)" << endl
-			 << "\'n\' must be positive. Nothing has been done." << endl;
-		return false;
+		n += length;
 	}
 
 	CircularListNode<DataType> *p = head;
@@ -356,6 +371,10 @@ bool CircularList<DataType>::erase(int n)
 	}
 	delete q;
 	length--;
+	if(length == 0)
+	{
+		head->link = NULL;
+	}
 	return true;
 }
 
@@ -399,7 +418,14 @@ DataType CircularList<DataType>::pop_back()
 
 	DataType element = p->link->data;
 	delete p->link;
-	p->link = head->link;
+	if(length != 1)
+	{
+		p->link = head->link;
+	}
+	else
+	{
+		head->link = NULL;
+	}
 	length--;
 	return element;
 }
@@ -441,8 +467,16 @@ bool CircularList<DataType>::swap(int i, int j)
 
 	i = i % length;
 	j = j % length;
+	if(i < 0)
+	{
+		i += length;
+	}
+	if(j < 0)
+	{
+		j += length;
+	}
 
-	if(i < 0 || j < 0 || i == j)
+	if(i == j)
 	{
 		cout << "Warning in bool List<DataType>::swap(int i, int j)" << endl
 			 << "i or j is(are) negtive, or try to swap the same position. Nothing has been done." << endl;

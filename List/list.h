@@ -196,7 +196,7 @@ List<DataType>::~List()
 		head->link = p->link;
 		delete p;
 	}
-	length = 0;
+	delete head;
 }
 
 template<typename DataType>
