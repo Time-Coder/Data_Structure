@@ -1,8 +1,8 @@
-#include "list.h"
+#include <circularlist.h>
 
 int main()
 {
-	List<double> list;
+	CircularList<double> list;
 	list.push_back(7);
 	list.push_back(3);
 	list.push_back(2);

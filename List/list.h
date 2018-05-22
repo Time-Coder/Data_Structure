@@ -108,7 +108,7 @@ public:
 	List<DataType>(int n, DataType element); // finished, tested
 	List<DataType>(const List<DataType>& list); // finished, tested
 	~List<DataType>(); // finished, tested
-	List<DataType>& operator =(const List<DataType>& list); // finished
+	List<DataType>& operator =(const List<DataType>& list); // finished, tested
 	void clear(); // finished, tested
 	int size()const; // finished, tested
 	bool empty()const; // finished, tested
@@ -442,4 +442,5 @@ bool List<DataType>::swap(int i, int j)
 
 	return true;
 }
+
 #endif
