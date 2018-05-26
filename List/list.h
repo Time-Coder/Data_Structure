@@ -14,15 +14,9 @@ public:
 	ListNode<DataType> *link = NULL;
 
 public:
-	ListNode<DataType>()
-	{
-		link = NULL;
-	}
-
 	ListNode<DataType>(DataType element)
 	{
 		data = element;
-		link = NULL;
 	}
 };
 
@@ -297,8 +291,7 @@ bool List<DataType>::insert(int n, DataType element)
 	for(int i = 0; i < n; i++, p = p->link){}
 	ListNode<DataType> *q = p->link;
 	p->link = new ListNode<DataType>(element);
-	p = p->link;
-	p->link = q;
+	p->link->link = q;
 	length++;
 	return true;
 }
@@ -336,11 +329,9 @@ void List<DataType>::push_back(DataType element)
 template<typename DataType>
 void List<DataType>::push_front(DataType element)
 {
-	ListNode<DataType> *p = head;
-	ListNode<DataType> *q = head->link;
-	p->link = new ListNode<DataType>(element);
-	p = p->link;
-	p->link = q;
+	ListNode<DataType> *p = head->link;
+	head->link = new ListNode<DataType>(element);
+	head->link->link = p;
 	length++;
 }
 
@@ -349,7 +340,8 @@ DataType List<DataType>::pop_back()
 {
 	if(empty())
 	{
-		cout << "Error: In \'DataType List<DataType>::pop_back()\' the list is empty." << endl;
+		cout << "Error in \'DataType List<DataType>::pop_back()\'" << endl
+			 << "The list is empty." << endl;
 		exit(-1);
 	}
 

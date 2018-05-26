@@ -1,5 +1,5 @@
 HeadPath := ..
-Head := circularlist.h
+Head := circlist.h
 
 MainSource := example.cpp
 MainHead := example.h

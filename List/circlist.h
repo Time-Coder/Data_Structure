@@ -1,5 +1,5 @@
-#ifndef CIRCULARLIST_H
-#define CIRCULARLIST_H
+#ifndef CIRCLIST_H
+#define CIRCLIST_H
 
 #include <iostream>
 #include <iterator>
@@ -7,71 +7,66 @@
 using namespace std;
 
 template<typename DataType>
-class CircularListNode
+class CircNode
 {
 public:
 	DataType data;
-	CircularListNode<DataType> *link = NULL;
+	CircNode<DataType> *link = NULL;
 
 public:
-	CircularListNode<DataType>()
-	{
-		link = NULL;
-	}
-
-	CircularListNode<DataType>(DataType element)
+	CircNode<DataType>(){};
+	CircNode<DataType>(DataType element)
 	{
 		data = element;
-		link = NULL;
 	}
 };
 
 template<class Class, typename DataType>
-class CircularListIterator : public iterator<input_iterator_tag, Class>
+class CircListIterator : public iterator<input_iterator_tag, Class>
 {
 private:
 	Class* _ptr = NULL;
 
 public:
-	CircularListIterator()
+	CircListIterator()
 	{
 		_ptr = NULL;
 	}
 
-	CircularListIterator(Class *p)
+	CircListIterator(Class *p)
 	{
 		_ptr = p;
 	}
 
-	~CircularListIterator()
+	~CircListIterator()
 	{
 		_ptr = NULL;
 	}
 
-    CircularListIterator& operator =(const CircularListIterator& it)
+    CircListIterator& operator =(const CircListIterator& it)
     {
         _ptr = it._ptr;
     }
 
-    bool operator !=(const CircularListIterator& it)
+    bool operator !=(const CircListIterator& it)
     {
         return (_ptr != it._ptr);
     }
 
-    bool operator ==(const CircularListIterator& it)
+    bool operator ==(const CircListIterator& it)
     {
         return (_ptr == it._ptr);
     }
 
-    CircularListIterator& operator ++()
+    CircListIterator& operator ++()
     {
         _ptr = _ptr->link;
         return *this;
     }
 
-    CircularListIterator operator ++(int)
+    CircListIterator operator ++(int)
     {
-        CircularListIterator temp = *this;
+        CircListIterator temp = *this;
         _ptr = _ptr->link;
         return temp;
     }
@@ -83,11 +78,11 @@ public:
 };
 
 template<typename DataType>
-class CircularList
+class CircList
 {
-	friend ostream & operator <<(ostream& out, const CircularList<DataType>& list)
+	friend ostream & operator <<(ostream& out, const CircList<DataType>& list)
 	{
-		CircularList<DataType>::iterator it = list.begin();
+		CircList<DataType>::iterator it = list.begin();
 		for(int i = 0; i < list.size(); i++, it++)
 		{
 			out << (*it) << endl;
@@ -97,94 +92,95 @@ class CircularList
 	}
 
 private:
-	CircularListNode<DataType> *head = new CircularListNode<DataType>();
+	CircNode<DataType> *head = new CircNode<DataType>();
 	int length = 0;
 
 public:
-	typedef CircularListIterator< CircularListNode<DataType>, DataType > iterator;
+	typedef CircListIterator< CircNode<DataType>, DataType > iterator;
 
 public:
-	CircularList<DataType>(){}; // tested
-	CircularList<DataType>(int n); // tested
-	CircularList<DataType>(int n, DataType element); // tested
-	CircularList<DataType>(const CircularList<DataType>& list); // tested
-	~CircularList<DataType>(); // tested
-	CircularList<DataType>& operator =(const CircularList<DataType>& list); // tested
-	void clear(); // tested
-	int size()const; // tested
-	bool empty()const; // tested
-	DataType& operator [](int i); // tested
-	DataType operator [](int i)const; // tested
-	int locate(DataType element)const; // tested
-	void insert(int n, DataType element); // tested
-	bool erase(int n); // tested
-	void push_back(DataType element); // tested
-	void push_front(DataType element); // tested
-	DataType pop_back(); // tested
-	DataType pop_front(); // tested
-	bool swap(int i, int j); // tested
-	iterator begin()const; // tested
-	iterator tail()const; // tested
+	CircList<DataType>(){};
+	CircList<DataType>(int n);
+	CircList<DataType>(int n, DataType element);
+	CircList<DataType>(const CircList<DataType>& list);
+	~CircList<DataType>();
+	CircList<DataType>& operator =(const CircList<DataType>& list);
+	void clear();
+	int size()const;
+	bool empty()const;
+	DataType& operator [](int i);
+	DataType operator [](int i)const;
+	int locate(DataType element)const;
+	void insert(int n, DataType element);
+	bool erase(int n);
+	void push_back(DataType element);
+	void push_front(DataType element);
+	DataType pop_back();
+	DataType pop_front();
+	bool swap(int i, int j);
+	CircList<DataType> cat(const CircList<DataType>& list);
+	iterator begin()const;
+	iterator tail()const;
 };
 
 template<typename DataType>
-typename CircularList<DataType>::iterator CircularList<DataType>::begin()const
+typename CircList<DataType>::iterator CircList<DataType>::begin()const
 {
 	return iterator(head->link);
 }
 
 template<typename DataType>
-typename CircularList<DataType>::iterator CircularList<DataType>::tail()const
+typename CircList<DataType>::iterator CircList<DataType>::tail()const
 {
-	CircularListNode<DataType> *p = head;
+	CircNode<DataType> *p = head;
 	for(int i = 0; i < length; i++, p = p->link){}
 	return iterator(p);
 }
 
 template<typename DataType>
-CircularList<DataType>::CircularList(int n)
+CircList<DataType>::CircList(int n)
 {
 	if(n < 0)
 	{
-		cout << "Error in \'CircularList<DataType>::CircularList(int n)\', \'n\' must be positive." << endl;
+		cout << "Error in \'CircList<DataType>::CircList(int n)\', \'n\' must be positive." << endl;
 		exit(-1);
 	}
 
-	CircularListNode<DataType>* p = head;
+	CircNode<DataType>* p = head;
 	for(int i = 0; i < n; i++, p = p->link)
 	{
-		p->link = new CircularListNode<DataType>;
+		p->link = new CircNode<DataType>;
 	}
 	p->link = head->link;
 	length = n;
 }
 
 template<typename DataType>
-CircularList<DataType>::CircularList(int n, DataType element)
+CircList<DataType>::CircList(int n, DataType element)
 {
 	if(n < 0)
 	{
-		cout << "Error in \'CircularList<DataType>::CircularList(int n, DataType)\', \'n\' must be positive." << endl;
+		cout << "Error in \'CircList<DataType>::CircList(int n, DataType)\', \'n\' must be positive." << endl;
 		exit(-1);
 	}
 
-	CircularListNode<DataType>* p = head;
+	CircNode<DataType>* p = head;
  	for(int i = 0; i < n; i++, p = p->link)
 	{
-		p->link = new CircularListNode<DataType>(element);
+		p->link = new CircNode<DataType>(element);
 	}
 	p->link = head->link;
 	length = n;
 }
 
 template<typename DataType>
-CircularList<DataType>::CircularList(const CircularList<DataType>& list)
+CircList<DataType>::CircList(const CircList<DataType>& list)
 {
-	CircularListNode<DataType> *p = head;
-	CircularListNode<DataType> *q = list.head;
+	CircNode<DataType> *p = head;
+	CircNode<DataType> *q = list.head;
 	for(int i = 0; i < list.length; i++)
 	{
-		p->link = new CircularListNode<DataType>(q->link->data);
+		p->link = new CircNode<DataType>(q->link->data);
 		p = p->link;
 		q = q->link;
 	}
@@ -193,11 +189,11 @@ CircularList<DataType>::CircularList(const CircularList<DataType>& list)
 }
 
 template<typename DataType>
-CircularList<DataType>::~CircularList()
+CircList<DataType>::~CircList()
 {
 	for(int i = 0; i < length; i++)
 	{
-		CircularListNode<DataType> *p = head->link;
+		CircNode<DataType> *p = head->link;
 		head->link = p->link;
 		delete p;
 	}
@@ -205,13 +201,13 @@ CircularList<DataType>::~CircularList()
 }
 
 template<typename DataType>
-CircularList<DataType>& CircularList<DataType>::operator =(const CircularList<DataType>& list)
+CircList<DataType>& CircList<DataType>::operator =(const CircList<DataType>& list)
 {
-	CircularListNode<DataType> *p = head;
-	CircularListNode<DataType> *q = list.head;
+	CircNode<DataType> *p = head;
+	CircNode<DataType> *q = list.head;
 	for(int i = 0; i < list.length; i++)
 	{
-		p->link = new CircularListNode<DataType>(q->link->data);
+		p->link = new CircNode<DataType>(q->link->data);
 		p = p->link;
 		q = q->link;
 	}
@@ -222,11 +218,11 @@ CircularList<DataType>& CircularList<DataType>::operator =(const CircularList<Da
 }
 
 template<typename DataType>
-void CircularList<DataType>::clear()
+void CircList<DataType>::clear()
 {
 	for(int i = 0; i < length; i++)
 	{
-		CircularListNode<DataType> *p = head->link;
+		CircNode<DataType> *p = head->link;
 		head->link = p->link;
 		delete p;
 	}
@@ -235,19 +231,19 @@ void CircularList<DataType>::clear()
 }
 
 template<typename DataType>
-int CircularList<DataType>::size()const
+int CircList<DataType>::size()const
 {
 	return length;
 }
 
 template<typename DataType>
-bool CircularList<DataType>::empty()const
+bool CircList<DataType>::empty()const
 {
 	return (length == 0);
 }
 
 template<typename DataType>
-DataType& CircularList<DataType>::operator [](int n)
+DataType& CircList<DataType>::operator [](int n)
 {
 	if(length == 0)
 	{
@@ -261,17 +257,17 @@ DataType& CircularList<DataType>::operator [](int n)
 		n += length;
 	}
 
-	CircularListNode<DataType> *p = head->link;
+	CircNode<DataType> *p = head->link;
 	for(int i = 0; i < n; i++, p = p->link){}
 	return p->data;
 }
 
 template<typename DataType>
-DataType CircularList<DataType>::operator [](int n)const
+DataType CircList<DataType>::operator [](int n)const
 {
 	if(length == 0)
 	{
-		cout << "Error in \'DataType CircularList<DataType>::operator [](int n)const\':" << endl
+		cout << "Error in \'DataType CircList<DataType>::operator [](int n)const\':" << endl
 			 << "Empty list." << endl;
 		exit(-1);
 	}
@@ -281,15 +277,15 @@ DataType CircularList<DataType>::operator [](int n)const
 		n += length;
 	}
 
-	CircularListNode<DataType> *p = head->link;
+	CircNode<DataType> *p = head->link;
 	for(int i = 0; i < n; i++, p = p->link){}
 	return p->data;
 }
 
 template<typename DataType>
-int CircularList<DataType>::locate(DataType element)const
+int CircList<DataType>::locate(DataType element)const
 {
-	CircularListNode<DataType> *p = head->link;
+	CircNode<DataType> *p = head->link;
 	for(int i = 0; i < length; i++, p = p->link)
 	{
 		if(p->data == element)
@@ -301,7 +297,7 @@ int CircularList<DataType>::locate(DataType element)const
 }
 
 template<typename DataType>
-void CircularList<DataType>::insert(int n, DataType element)
+void CircList<DataType>::insert(int n, DataType element)
 {
 	bool flag = false;
 	int N = n % length;
@@ -315,31 +311,31 @@ void CircularList<DataType>::insert(int n, DataType element)
 		n += length;
 	}
 
-	CircularListNode<DataType> *p = head;
+	CircNode<DataType> *p = head;
 	if(length == 0)
 	{
-		p->link = new CircularListNode<DataType>(element);
+		p->link = new CircNode<DataType>(element);
 		p = p->link;
 		p->link = p;
 		length++;
 		return;
 	}
 
-	CircularListNode<DataType> *rear = head;
+	CircNode<DataType> *rear = head;
 	for(int i = 0; i < n; i++, p = p->link){}
 	for(int i = 0; i < length; i++, rear = rear->link){}
 
 	if(flag)
 	{
-		rear->link = new CircularListNode<DataType>(element);
+		rear->link = new CircNode<DataType>(element);
 		rear = rear->link;
 		rear->link = head->link;
 		length++;
 		return;
 	}
 
-	CircularListNode<DataType> *q = p->link;
-	p->link = new CircularListNode<DataType>(element);
+	CircNode<DataType> *q = p->link;
+	p->link = new CircNode<DataType>(element);
 	p = p->link;
 	p->link = q;
 	rear->link = head->link;
@@ -347,7 +343,7 @@ void CircularList<DataType>::insert(int n, DataType element)
 }
 
 template<typename DataType>
-bool CircularList<DataType>::erase(int n)
+bool CircList<DataType>::erase(int n)
 {
 	if(length == 0)
 	{
@@ -361,9 +357,9 @@ bool CircularList<DataType>::erase(int n)
 		n += length;
 	}
 
-	CircularListNode<DataType> *p = head;
+	CircNode<DataType> *p = head;
 	for(int i = 0; i < n; i++, p = p->link){}
-	CircularListNode<DataType> *q = p->link;
+	CircNode<DataType> *q = p->link;
 	p->link = q->link;
 	if(q == head->link)
 	{
@@ -379,24 +375,24 @@ bool CircularList<DataType>::erase(int n)
 }
 
 template<typename DataType>
-void CircularList<DataType>::push_back(DataType element)
+void CircList<DataType>::push_back(DataType element)
 {
-	CircularListNode<DataType> *p = head;
+	CircNode<DataType> *p = head;
 	for(int i = 0; i < length; i++, p = p->link){}
-	p->link = new CircularListNode<DataType>(element);
+	p->link = new CircNode<DataType>(element);
 	p = p->link;
 	p->link = head->link;
 	length++;
 }
 
 template<typename DataType>
-void CircularList<DataType>::push_front(DataType element)
+void CircList<DataType>::push_front(DataType element)
 {
-	CircularListNode<DataType> *p = head;
-	CircularListNode<DataType> *q = head->link;
-	CircularListNode<DataType> *tail = head;
+	CircNode<DataType> *p = head;
+	CircNode<DataType> *q = head->link;
+	CircNode<DataType> *tail = head;
 	for(int i = 0; i < length; i++, tail = tail->link){}
-	p->link = new CircularListNode<DataType>(element);
+	p->link = new CircNode<DataType>(element);
 	p = p->link;
 	p->link = q;
 	tail->link = p;
@@ -404,16 +400,16 @@ void CircularList<DataType>::push_front(DataType element)
 }
 
 template<typename DataType>
-DataType CircularList<DataType>::pop_back()
+DataType CircList<DataType>::pop_back()
 {
 	if(length == 0)
 	{
-		cout << "Error in \'DataType CircularList<DataType>::pop_back()\'." << endl
+		cout << "Error in \'DataType CircList<DataType>::pop_back()\'." << endl
 			 << "Empty list." << endl;
 		exit(-1);
 	}
 
-	CircularListNode<DataType> *p = head;
+	CircNode<DataType> *p = head;
 	for(int i = 0; i < length-1; i++, p = p->link){}
 
 	DataType element = p->link->data;
@@ -431,16 +427,16 @@ DataType CircularList<DataType>::pop_back()
 }
 
 template<typename DataType>
-DataType CircularList<DataType>::pop_front()
+DataType CircList<DataType>::pop_front()
 {
 	if(length == 0)
 	{
-		cout << "Error in \'DataType CircularList<DataType>::pop_front()\'" << endl
+		cout << "Error in \'DataType CircList<DataType>::pop_front()\'" << endl
 			 << "Empty list." << endl;
 		exit(-1);
 	}
 
-	CircularListNode<DataType> *p = head->link;
+	CircNode<DataType> *p = head->link;
 	DataType element = p->data;
 	if(length != 1)
 	{
@@ -456,7 +452,7 @@ DataType CircularList<DataType>::pop_front()
 }
 
 template<typename DataType>
-bool CircularList<DataType>::swap(int i, int j)
+bool CircList<DataType>::swap(int i, int j)
 {
 	if(length == 0)
 	{
@@ -488,14 +484,14 @@ bool CircularList<DataType>::swap(int i, int j)
 		std::swap(i, j);
 	}
 
-	CircularListNode<DataType> *pi_last = head;
+	CircNode<DataType> *pi_last = head;
 	for(int it = 0; it < i; it++, pi_last = pi_last->link){}
-	CircularListNode<DataType> *pj_last = head;
+	CircNode<DataType> *pj_last = head;
 	for(int it = 0; it < j; it++, pj_last = pj_last->link){}
 
-	CircularListNode<DataType> *pi = pi_last->link;
-	CircularListNode<DataType> *pj = pj_last->link;
-	CircularListNode<DataType> *pj_next = pj->link;
+	CircNode<DataType> *pi = pi_last->link;
+	CircNode<DataType> *pj = pj_last->link;
+	CircNode<DataType> *pj_next = pj->link;
 
 	if(head->link == pi)
 	{
@@ -521,6 +517,24 @@ bool CircularList<DataType>::swap(int i, int j)
 	}
 
 	return true;
+}
+
+template<typename DataType>
+CircList<DataType> CircList<DataType>::cat(const CircList<DataType>& list)
+{
+	CircNode<DataType> *p = head;
+	for(int i = 0; i < length; i++, p = p->link){}
+
+	CircNode<DataType> *q = list.head->link;
+	for(int i = 0; i < list.length; i++, p = p->link, q = q->link)
+	{
+		p->link = new CircNode<DataType>(q->data);
+	}
+
+	p->link = head->link;
+	length += list.length;
+
+	return *this;
 }
 
 #endif
