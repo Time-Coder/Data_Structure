@@ -6,6 +6,8 @@
 //
 // Description: This code has build a Stack's template class.
 //
+// Edit in 2018-5-26: Do some simplification.
+//
 // See usage in "./README.md"
 // See examples in "./examples/"
 
@@ -20,9 +22,9 @@ using namespace std;
 
 // Convert a variable X of type "DataType" into string in cout format.
 template<typename DataType>
-string cout2string(const DataType& X);
+string cout2string(const DataType& element);
 
-// Define class "StackNode" to store a stack element.
+// Define struct "StackNode" to store a stack element.
 template<typename DataType>
 class StackNode
 {
@@ -31,10 +33,15 @@ public:
 	StackNode *link = NULL; // Store the pointer that point to next StackNode.
 
 public:
-	// StackNode's constructor without initial value.
-	StackNode<DataType>()
+	StackNode<DataType>(){};
+	StackNode<DataType>(DataType element)
 	{
-		link = NULL;
+		data = element;
+	}
+	StackNode<DataType>(DataType element, StackNode *ptr)
+	{
+		data = element;
+		link = ptr;
 	}
 };
 
@@ -99,13 +106,14 @@ class Stack
 private:
 	StackNode<DataType> *head;
 	// To store a Stack, just need to store it's head node's adress.
+	int length = 0;
 
 public:
 	// Stack's constructor without initial value.
 	Stack<DataType>();
 
 	// Stack's copy constructor.
-	Stack<DataType>(const Stack<DataType>& X);
+	Stack<DataType>(const Stack<DataType>& stack);
 
 	// Stack's destructor.
 	~Stack<DataType>();
@@ -113,107 +121,74 @@ public:
 	//-------------------------------------------------------------------------------
 
 	// Function: Stack<DataType>& operator =(const Stack<DataType>&);
-	//
 	// Descripsion: Reload Stack's operator "=".
 	//				Make it possible to use "=" to clone a Stack to another.
-	//
 	// Input Parameter: const Stack<DataType>& X:	Stack on the right of "=".
-	//
 	// Output Parameter: Nothing.
-	//
 	// Return: A reference of Stack.
-	Stack<DataType>& operator =(const Stack<DataType>& X);
+	Stack<DataType>& operator =(const Stack<DataType>& stack);
 
 	//-------------------------------------------------------------------------------
 
 	// Function: void Stack<DataType>::clear();
-	//
     // Description: Clear Stack's memory.
-    //
     // Input Parameter: Nothing
-    //
     // Output Parameter: Nothing
-    //
     // Return: void.
 	void clear();
 
 	//-------------------------------------------------------------------------------
 
 	// Function: void push(const DataType&);
-	//
     // Description: Push a element into Stack.
-    //
     // Input Parameter: const DataType& x:	The element waited to be pushed into stack.
-    //
     // Output Parameter: Nothing
-    //
     // Return: void.
-	void push(const DataType& x);
+	void push(const DataType& element);
 
 	//-------------------------------------------------------------------------------
 
 	// Function: DataType pop();
-	//
     // Description: Pop a element from the Stack.
-    //
     // Input Parameter: Nothing
-    //
     // Output Parameter: Nothing
-    //
     // Return: Poped element.
-    //
     // Others: This function will delete the top element of the initial Stack.
 	DataType pop();
 
 	//-------------------------------------------------------------------------------
 
 	// Function: DataType top()const;
-	//
     // Description: Look the top element of the Stack.
-    //
     // Input Parameter: Nothing
-    //
     // Output Parameter: Nothing
-    //
     // Return: Poped element.
 	DataType top()const;
 
 	//-------------------------------------------------------------------------------
 
 	// Function: bool Stack<DataType>::empty()const;
-	//
     // Description: To judge if a Stack is empty or not.
-    //
     // Input Parameter: Nothing
-    //
     // Output Parameter: Nothing
-    //
     // Return: "true" when Stack is empty.
 	bool empty()const;
 
 	//-------------------------------------------------------------------------------
 
 	// Function: int Stack<DataType>::length()const;
-	//
     // Description: To count there are how many elements in the stack.
-    //
     // Input Parameter: Nothing
-    //
     // Output Parameter: Nothing
-    //
     // Return: The number of elements in the Stack.
-	int length()const;
+	int size()const;
 
 	//-------------------------------------------------------------------------------
 
 	// Function: Stack<DataType>& Stack<DataType>::inverse();
-	//
     // Description: To reverse a Stack.
-    //
     // Input Parameter: Nothing
-    //
     // Output Parameter: Nothing
-    //
     // Return: A reference to current stack.
 	Stack<DataType>& inverse();
 };
@@ -222,11 +197,11 @@ public:
 
 // Convert a variable X of type "DataType" into string in cout format.
 template<typename DataType>
-string cout2string(const DataType& X)
+string cout2string(const DataType& element)
 {
-    ostringstream strs;
-    strs << X;
-    return strs.str();
+    ostringstream oss;
+    oss << element;
+    return oss.str();
 }
 
 //-------------------------------------------------------------------------------
@@ -241,14 +216,13 @@ Stack<DataType>::Stack()
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
-	head->link = NULL;
 }
 
 //-------------------------------------------------------------------------------
 
 // Stack's copy constructor.
 template<typename DataType>
-Stack<DataType>::Stack(const Stack<DataType>& X)
+Stack<DataType>::Stack(const Stack<DataType>& stack)
 {
 	head = new StackNode<DataType>;
 	if(!head)
@@ -258,23 +232,21 @@ Stack<DataType>::Stack(const Stack<DataType>& X)
 	}
 
 	StackNode<DataType> *p = head;
-	StackNode<DataType> *q = X.head;
+	StackNode<DataType> *q = stack.head;
 	while(q->link != NULL)
 	{
-		StackNode<DataType> *newNode = new StackNode<DataType>;
-		if(!newNode)
+		p->link = new StackNode<DataType>(q->link->data);
+		if(!(p->link))
 		{
 			cerr << "Failed to allocate memory!" << endl;
 			exit(-1);
 		}
 
-		newNode->data = (q->link)->data;
-		newNode->link = NULL;
-		p->link = newNode;
-
 		p = p->link;
 		q = q->link;
 	}
+
+	length = stack.length;
 }
 
 //-------------------------------------------------------------------------------
@@ -287,62 +259,57 @@ Stack<DataType>::~Stack<DataType>()
 	{
 		pop();
 	}
+	length = 0;
+	delete head;
 }
 
 //-------------------------------------------------------------------------------
 
 // Function: void Stack<DataType>::clear();
-//
 // Description: Clear Stack's memory.
-//
 // Calls: Stack<DataType>::~Stack<DataType>();
 //		  // Declared and defined in current file.
-//
 // Input Parameter: Nothing
-//
 // Output Parameter: Nothing
-//
 // Return: void.
 template<typename DataType>
 void Stack<DataType>::clear()
 {
-	this->~Stack<DataType>();
+	while(!empty())
+	{
+		pop();
+	}
+	length = 0;
 }
 
 //-------------------------------------------------------------------------------
 
 // Function: Stack<DataType>& operator =(const Stack<DataType>&);
-//
 // Descripsion: Reload Stack's operator "=".
 //				Make it possible to use "=" to clone a Stack to another.
-//
 // Input Parameter: const Stack<DataType>& X:	Stack on the right of "=".
-//
 // Output Parameter: Nothing.
-//
 // Return: A reference of Stack.
 template<typename DataType>
-Stack<DataType>& Stack<DataType>::operator =(const Stack<DataType>& X)
+Stack<DataType>& Stack<DataType>::operator =(const Stack<DataType>& stack)
 {
 	clear();
 
 	StackNode<DataType> *p = head;
-	StackNode<DataType> *q = X.head;
+	StackNode<DataType> *q = stack.head;
 	while(q->link != NULL)
 	{
-		StackNode<DataType> *newNode = new StackNode<DataType>;
-		if(!newNode)
+		p->link = new StackNode<DataType>(q->link->data);
+		if(!(p->link))
 		{
 			cerr << "Failed to allocate memory!" << endl;
 			exit(-1);
 		}
-		newNode->data = (q->link)->data;
-		newNode->link = NULL;
-		p->link = newNode;
-
 		p = p->link;
 		q = q->link;
 	}
+
+	length = stack.length;
 
 	return *this;
 }
@@ -350,79 +317,62 @@ Stack<DataType>& Stack<DataType>::operator =(const Stack<DataType>& X)
 //-------------------------------------------------------------------------------
 
 // Function: void push(const DataType&);
-//
 // Description: Push a element into Stack.
-//
 // Input Parameter: const DataType& x:	The element waited to be pushed into stack.
-//
 // Output Parameter: Nothing
-//
 // Return: void.
 template<typename DataType>
-void Stack<DataType>::push(const DataType& x)
+void Stack<DataType>::push(const DataType& element)
 {
-	StackNode<DataType> *newNode = new StackNode<DataType>;
-	if(!newNode)
+	head->link = new StackNode<DataType>(element, head->link);
+	if(!(head->link))
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
-
-	newNode->data = x;
-	newNode->link = (head)->link;
-	(head)->link = newNode;
+	length++;
 }
 
 //-------------------------------------------------------------------------------
 
 // Function: DataType pop();
-//
 // Description: Pop a element from the Stack.
-//
 // Input Parameter: Nothing
-//
 // Output Parameter: Nothing
-//
 // Return: Poped element.
-//
 // Others: This function will delete the top element of the initial Stack.
 template<typename DataType>
 DataType Stack<DataType>::pop()
 {
-	int __NaN = 0xFFC00000;
-	const DataType NaN = *((DataType *)&__NaN);
 	if(empty())
 	{
-		cout << "Error in Stack::pop! The stack is empty!" << endl;
-		return NaN;
+		cout << "Error in DataType Stack<DataType>::pop()" << endl
+			 << "The stack is empty" << endl;
+		exit(-1);
 	}
 	DataType element = head->link->data;
 	StackNode<DataType> *p = head->link;
-	head->link = head->link->link;
+	head->link = p->link;
 	delete p;
+	length--;
 	return element;
 }
 
 //-------------------------------------------------------------------------------
 
 // Function: DataType top()const;
-//
 // Description: Look the top element of the Stack.
-//
 // Input Parameter: Nothing
-//
 // Output Parameter: Nothing
-//
 // Return: Poped element.
 template<typename DataType>
 DataType Stack<DataType>::top()const
 {
-	int __NaN = 0xFFC00000;
-	const DataType NaN = *((DataType *)&__NaN);
 	if(empty())
 	{
-		cout << "Error in Stack::top! The stack is empty!" << endl;
-		return NaN;
+		cout << "Error in DataType Stack<DataType>::top()const" << endl
+			 << "The stack is empty!" << endl;
+		exit(-1);
 	}
 	return head->link->data;
 }
@@ -430,56 +380,35 @@ DataType Stack<DataType>::top()const
 //-------------------------------------------------------------------------------
 
 // Function: bool Stack<DataType>::empty()const;
-//
 // Description: To judge if a Stack is empty or not.
-//
 // Input Parameter: Nothing
-//
 // Output Parameter: Nothing
-//
 // Return: "true" when Stack is empty.
 template<typename DataType>
 bool Stack<DataType>::empty()const
 {
-	return (head->link == NULL);
+	return (length == 0);
 }
 
 //-------------------------------------------------------------------------------
 
 // Function: int Stack<DataType>::length()const;
-//
 // Description: To count there are how many elements in the stack.
-//
 // Input Parameter: Nothing
-//
 // Output Parameter: Nothing
-//
 // Return: The number of elements in the Stack.
 template<typename DataType>
-int Stack<DataType>::length()const
+int Stack<DataType>::size()const
 {
-	int n = 0;
-
-	StackNode<DataType> *p = head;
-	while(p->link != NULL)
-	{
-		n++;
-		p = p->link;
-	}
-
-	return n;
+	return length;
 }
 
 //-------------------------------------------------------------------------------
 
 // Function: Stack<DataType>& Stack<DataType>::inverse();
-//
 // Description: To reverse a Stack.
-//
 // Input Parameter: Nothing
-//
 // Output Parameter: Nothing
-//
 // Return: A reference to current stack.
 template<typename DataType>
 Stack<DataType>& Stack<DataType>::inverse()

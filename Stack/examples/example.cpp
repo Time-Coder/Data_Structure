@@ -37,7 +37,7 @@ int main()
 	double x = S3.pop();
 	cout << "After pop out the top element " << x << " of S3, S3 = " << S3 << endl;
 
-	cout << "The length of S3 is: " << S3.length() << endl;
+	cout << "The length of S3 is: " << S3.size() << endl;
 
 	S3.inverse();
 
