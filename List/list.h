@@ -14,9 +14,19 @@ public:
 	ListNode<DataType> *link = NULL;
 
 public:
+	ListNode<DataType>(){}
 	ListNode<DataType>(DataType element)
 	{
 		data = element;
+	}
+	ListNode<DataType>(DataType element, ListNode<DataType> *ptr)
+	{
+		data = element;
+		link = ptr;
+	}
+	~ListNode<DataType>()
+	{
+		link = NULL;
 	}
 };
 
@@ -90,14 +100,14 @@ class List
 	}
 
 private:
-	ListNode<DataType> *head = new ListNode<DataType>();
+	ListNode<DataType> *head = NULL;
 	int length = 0;
 
 public:
 	typedef ListIterator< ListNode<DataType>, DataType > iterator;
 
 public:
-	List<DataType>(){}; // finished, tested
+	List<DataType>(); // finished, tested
 	List<DataType>(int n); // finished, tested
 	List<DataType>(int n, DataType element); // finished, tested
 	List<DataType>(const List<DataType>& list); // finished, tested
@@ -134,18 +144,42 @@ typename List<DataType>::iterator List<DataType>::end()const
 }
 
 template<typename DataType>
+List<DataType>::List()
+{
+	head = new ListNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+}
+
+template<typename DataType>
 List<DataType>::List(int n)
 {
 	if(n < 0)
 	{
-		cout << "Error in \'List<DataType>::List(int n)\', \'n\' must be positive." << endl;
+		cout << "Error in \'List<DataType>::List(int n)\'" << endl
+			 << "\'n\' must be positive." << endl;
+		exit(-1);
+	}
+
+	head = new ListNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
 
 	ListNode<DataType>* p = head;
-	for(int i = 0; i < n; i++,p = p->link)
+	for(int i = 0; i < n; i++, p = p->link)
 	{
 		p->link = new ListNode<DataType>;
+		if(!(p->link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 	}
 	length = n;
 }
@@ -155,7 +189,15 @@ List<DataType>::List(int n, DataType element)
 {
 	if(n < 0)
 	{
-		cout << "Error in \'List<DataType>::List(int n, DataType)\', \'n\' must be positive." << endl;
+		cout << "Error in \'List<DataType>::List(int n, DataType)\'" << endl
+			 << "\'n\' must be positive." << endl;
+		exit(-1);
+	}
+
+	head = new ListNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
 
@@ -163,6 +205,11 @@ List<DataType>::List(int n, DataType element)
  	for(int i = 0; i < n; i++, p = p->link)
 	{
 		p->link = new ListNode<DataType>(element);
+		if(!(p->link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 	}
 	length = n;
 }
@@ -170,11 +217,23 @@ List<DataType>::List(int n, DataType element)
 template<typename DataType>
 List<DataType>::List(const List<DataType>& list)
 {
+	head = new ListNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
 	ListNode<DataType> *p = head;
 	ListNode<DataType> *q = list.head;
 	while(q->link)
 	{
 		p->link = new ListNode<DataType>(q->link->data);
+		if(!(p->link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 		p = p->link;
 		q = q->link;
 	}
@@ -196,11 +255,18 @@ List<DataType>::~List()
 template<typename DataType>
 List<DataType>& List<DataType>::operator =(const List<DataType>& list)
 {
+	clear();
+
 	ListNode<DataType> *p = head;
 	ListNode<DataType> *q = list.head;
 	while(q->link)
 	{
 		p->link = new ListNode<DataType>(q->link->data);
+		if(!(p->link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 		p = p->link;
 		q = q->link;
 	}
@@ -290,8 +356,12 @@ bool List<DataType>::insert(int n, DataType element)
 	ListNode<DataType> *p = head;
 	for(int i = 0; i < n; i++, p = p->link){}
 	ListNode<DataType> *q = p->link;
-	p->link = new ListNode<DataType>(element);
-	p->link->link = q;
+	p->link = new ListNode<DataType>(element, q);
+	if(!(p->link))
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
 	length++;
 	return true;
 }
@@ -323,6 +393,11 @@ void List<DataType>::push_back(DataType element)
 		p = p->link;
 	}
 	p->link = new ListNode<DataType>(element);
+	if(!(p->link))
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
 	length++;
 }
 
@@ -330,15 +405,19 @@ template<typename DataType>
 void List<DataType>::push_front(DataType element)
 {
 	ListNode<DataType> *p = head->link;
-	head->link = new ListNode<DataType>(element);
-	head->link->link = p;
+	head->link = new ListNode<DataType>(element, p);
+	if(!(head->link))
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
 	length++;
 }
 
 template<typename DataType>
 DataType List<DataType>::pop_back()
 {
-	if(empty())
+	if(length == 0)
 	{
 		cout << "Error in \'DataType List<DataType>::pop_back()\'" << endl
 			 << "The list is empty." << endl;
@@ -361,7 +440,7 @@ DataType List<DataType>::pop_back()
 template<typename DataType>
 DataType List<DataType>::pop_front()
 {
-	if(empty())
+	if(length == 0)
 	{
 		cout << "Error: In \'DataType List<DataType>::pop_front()\' the list is empty." << endl;
 		exit(-1);
@@ -388,6 +467,11 @@ List<DataType> List<DataType>::cat(const List<DataType>& list)
 	while(q)
 	{
 		p->link = new ListNode<DataType>(q->data);
+		if(!(p->link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 		p = p->link;
 		q = q->link;
 	}

@@ -11,14 +11,30 @@ class DblNode
 {
 public:
 	DataType data;
-	DblNode<DataType> *right_link = NULL;
 	DblNode<DataType> *left_link = NULL;
+	DblNode<DataType> *right_link = NULL;
 
 public:
 	DblNode<DataType>(){};
 	DblNode<DataType>(DataType element)
 	{
 		data = element;
+	}
+	DblNode<DataType>(DblNode<DataType> *lptr, DblNode<DataType> *rptr)
+	{
+		left_link = lprt;
+		right_link = rptr;
+	}
+	DblNode<DataType>(DataType element, DblNode<DataType> *lptr, DblNode<DataType> *rptr)
+	{
+		data = element;
+		left_link = lprt;
+		right_link = rptr;
+	}
+	~DblNode<DataType>()
+	{
+		left_link = NULL;
+		right_link = NULL;
 	}
 };
 
@@ -29,10 +45,7 @@ private:
 	Class* _ptr = NULL;
 
 public:
-	DblIterator()
-	{
-		_ptr = NULL;
-	}
+	DblIterator(){}
 
 	DblIterator(Class *p)
 	{
@@ -105,8 +118,8 @@ class DblList
 	}
 
 private:
-	DblNode<DataType> *head = new DblNode<DataType>();
-	DblNode<DataType> *tail = new DblNode<DataType>();
+	DblNode<DataType> *head = NULL;
+	DblNode<DataType> *tail = NULL;
 	int length = 0;
 
 public:
@@ -152,8 +165,21 @@ typename DblList<DataType>::iterator DblList<DataType>::end()const
 template<typename DataType>
 DblList<DataType>::DblList()
 {
+	head = new DblNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	tail = new DblNode<DataType>(head, NULL);
+	if(!tail)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
 	head->right_link = tail;
-	tail->left_link = head;
 }
 
 template<typename DataType>
@@ -166,11 +192,29 @@ DblList<DataType>::DblList(int n)
 		exit(-1);
 	}
 
+	head = new DblNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	tail = new DblNode<DataType>;
+	if(!tail)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
 	DblNode<DataType>* p = head;
 	for(int i = 0; i < n; i++, p = p->right_link)
 	{
-		p->right_link = new DblNode<DataType>();
-		p->right_link->left_link = p;
+		p->right_link = new DblNode<DataType>(p, NULL);
+		if(!(p->right_link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 	}
 	p->right_link = tail;
 	tail->left_link = p;
@@ -187,11 +231,29 @@ DblList<DataType>::DblList(int n, DataType element)
 		exit(-1);
 	}
 
+	head = new DblNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	tail = new DblNode<DataType>;
+	if(!tail)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
 	DblNode<DataType>* p = head;
 	for(int i = 0; i < n; i++, p = p->right_link)
 	{
-		p->right_link = new DblNode<DataType>(element);
-		p->right_link->left_link = p;
+		p->right_link = new DblNode<DataType>(element, p, NULL);
+		if(!(p->right_link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 	}
 	p->right_link = tail;
 	tail->left_link = p;
@@ -201,12 +263,30 @@ DblList<DataType>::DblList(int n, DataType element)
 template<typename DataType>
 DblList<DataType>::DblList(const DblList<DataType>& list)
 {
+	head = new DblNode<DataType>;
+	if(!head)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	tail = new DblNode<DataType>;
+	if(!tail)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
 	DblNode<DataType> *p = head;
 	DblNode<DataType> *q = list.head;
 	while(q->right_link != list.tail)
 	{
-		p->right_link = new DblNode<DataType>(q->right_link->data);
-		p->right_link->left_link = p;
+		p->right_link = new DblNode<DataType>(q->right_link->data, p, NULL);
+		if(!(p->right_link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 		p = p->right_link;
 		q = q->right_link;
 	}
@@ -224,6 +304,7 @@ DblList<DataType>::~DblList()
 		head->right_link = p->right_link;
 		delete p;
 	}
+	length = 0;
 	delete head;
 	delete tail;
 }
@@ -231,12 +312,17 @@ DblList<DataType>::~DblList()
 template<typename DataType>
 DblList<DataType>& DblList<DataType>::operator =(const DblList<DataType>& list)
 {
+	clear();
 	DblNode<DataType> *p = head;
 	DblNode<DataType> *q = list.head;
 	while(q->right_link != list.tail)
 	{
-		p->right_link = new DblNode<DataType>(q->right_link->data);
-		p->right_link->left_link = p;
+		p->right_link = new DblNode<DataType>(q->right_link->data, p, NULL);
+		if(!(p->right_link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 		p = p->right_link;
 		q = q->right_link;
 	}
@@ -330,9 +416,12 @@ bool DblList<DataType>::insert(int n, DataType element)
 	DblNode<DataType> *p = head;
 	for(int i = 0; i < n; i++, p = p->right_link){}
 	DblNode<DataType> *q = p->right_link;
-	p->right_link = new DblNode<DataType>(element);
-	p->right_link->left_link = p;
-	p->right_link->right_link = q;
+	p->right_link = new DblNode<DataType>(element, p, q);
+	if(!(p->right_link))
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
 	q->left_link = p->right_link;
 	length++;
 	return true;
@@ -361,9 +450,12 @@ template<typename DataType>
 void DblList<DataType>::push_back(DataType element)
 {
 	DblNode<DataType> *p = tail->left_link;
-	tail->left_link = new DblNode<DataType>(element);
-	tail->left_link->left_link = p;
-	tail->left_link->right_link = tail;
+	tail->left_link = new DblNode<DataType>(element, p, tail);
+	if(!(tail->left_link))
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
 	p->right_link = tail->left_link;
 	length++;
 }
@@ -372,9 +464,12 @@ template<typename DataType>
 void DblList<DataType>::push_front(DataType element)
 {
 	DblNode<DataType> *p = head->right_link;
-	head->right_link = new DblNode<DataType>(element);
-	head->right_link->left_link = head;
-	head->right_link->right_link = p;
+	head->right_link = new DblNode<DataType>(element, head, p);
+	if(!(head->right_link))
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
 	p->left_link = head->right_link;
 	length++;
 }
@@ -382,7 +477,7 @@ void DblList<DataType>::push_front(DataType element)
 template<typename DataType>
 DataType DblList<DataType>::pop_back()
 {
-	if(empty())
+	if(length == 0)
 	{
 		cout << "Error in \'DataType DblList<DataType>::pop_back()\'" << endl
 			 << "The list is empty." << endl;
@@ -401,7 +496,7 @@ DataType DblList<DataType>::pop_back()
 template<typename DataType>
 DataType DblList<DataType>::pop_front()
 {
-	if(empty())
+	if(length == 0)
 	{
 		cout << "Error in \'DataType DblList<DataType>::pop_front()\'" << endl
 			 << "The list is empty." << endl;
@@ -424,12 +519,16 @@ DblList<DataType> DblList<DataType>::cat(const DblList<DataType>& list)
 	while(p != list.tail)
 	{
 		DblNode<DataType> *q = tail->left_link;
-		tail->left_link = new DblNode<DataType>(p->data);
-		tail->left_link->left_link = q;
+		tail->left_link = new DblNode<DataType>(p->data, q, tail);
+		if(!(tail->left_link))
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
 		q->right_link = tail->left_link;
 		p = p->right_link;
 	}
-	tail->left_link->right_link = tail;
+	
 	length += list.length;
 	return *this;
 }

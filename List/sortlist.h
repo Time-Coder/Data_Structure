@@ -28,7 +28,7 @@ public:
 	ListNode<DataType>* link = NULL;
 
 public:
-	ListNode<DataType>();
+	ListNode<DataType>(){};
 };
 
 // Define SortList's iterator(read only).
