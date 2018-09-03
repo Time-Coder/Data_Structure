@@ -5,7 +5,7 @@ int main()
 	// 1. Creat a deque
 
 	// 1.1 Creat an empty deque
-	Deque<double> deque1;
+	Deque<double> deque1
 
 	// 1.2 Creat a deque using initializer_list
 	Deque<double> deque2 = {1.02, 2.43, 5.67, 2.38, 7.49};
