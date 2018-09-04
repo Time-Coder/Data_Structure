@@ -3,7 +3,6 @@
 int main()
 {
 	String str = "0123456789";
-	cout << str[10] << endl;
-
+	cout << str << endl;
 	return 0;
 }

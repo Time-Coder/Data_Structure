@@ -37,4 +37,23 @@ public:
 	String operator +(const String& str);
 	int find(const String& pattern);
 	friend ostream& operator <<(ostream& out, String str); // finished
+
+	class iterator // finished
+	{
+	public:
+		Block* current_block = NULL;
+		char* ptr = NULL;
+		int i_inner = 0;
+
+	public:
+	    iterator& operator =(const iterator& it);
+	    bool operator !=(const iterator& it);
+	    bool operator ==(const iterator& it);
+	    iterator& operator ++();
+	    iterator operator ++(int);
+	    char& operator *();
+	};
+
+	iterator begin();
+	iterator end();
 };

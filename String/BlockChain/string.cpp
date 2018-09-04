@@ -183,7 +183,8 @@ char& String::operator [](int i)
 {
 	if(i < 0 || i >= length)
 	{
-		return '\0';
+		cout << "Error in 'char& String::operator [](int i)'. Index i is out of range!" << endl;
+		exit(-1);
 	}
 
 	int n_block = i / BLOCK_SIZE;
@@ -228,4 +229,91 @@ ostream& operator <<(ostream& out, String str)
 	}
 
 	return out;
+}
+
+String::iterator& String::iterator::operator =(const String::iterator& it)
+{
+	current_block = it.current_block;
+	i_inner = it.i_inner;
+    ptr = it.ptr;
+
+    return *this;
+}
+
+bool String::iterator::operator !=(const iterator& it)
+{
+    return (ptr != it.ptr);
+}
+
+bool String::iterator::operator ==(const iterator& it)
+{
+    return (ptr == it.ptr);
+}
+
+String::iterator& String::iterator::operator ++()
+{
+    if(i_inner == BLOCK_SIZE-1)
+    {
+    	if(current_block->link == NULL)
+    	{
+    		ptr = NULL;
+    	}
+    	else
+    	{
+    		current_block = current_block->link;
+        	ptr = current_block->data;
+        	i_inner = 0;
+    	}
+    }
+    else
+    {
+    	ptr++;
+    	i_inner++;
+    }
+    return *this;
+}
+
+String::iterator String::iterator::operator ++(int)
+{
+    iterator temp = *this;
+    if(i_inner == BLOCK_SIZE-1)
+    {
+    	if(current_block->link == NULL)
+    	{
+    		ptr = NULL;
+    	}
+    	else
+    	{
+    		current_block = current_block->link;
+        	ptr = current_block->data;
+        	i_inner = 0;
+    	}
+    }
+    else
+    {
+    	ptr++;
+    	i_inner++;
+    }
+    return temp;
+}
+
+char& String::iterator::operator *()
+{
+    return *ptr;
+}
+
+String::iterator String::begin()
+{
+	String::iterator it;
+	it.current_block = first;
+	it.ptr = it.current_block->data;
+
+	return it;
+}
+
+String::iterator String::end()
+{
+	String::iterator it;
+
+	return it;
 }
