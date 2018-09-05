@@ -317,3 +317,53 @@ String::iterator String::end()
 
 	return it;
 }
+
+int* calculate_next(const String& pattern)
+{
+	int* next = new int[pattern.size()];
+	next[0] = -1;
+
+	for(int j = 1; j < pattern.size(); j++)
+	{
+		int k = next[j-1];
+		while(k != -1 && pattern[j-1] != pattern[k])
+		{
+			k = next[k];
+		}
+		next[j] = k + 1;
+	}
+
+	return next;
+}
+
+int String::find(const String& pattern)const
+{
+	int* next = calculate_next(pattern);
+
+	int i = 0, j = 0;
+	while(length - i > pattern.length - j)
+	{
+		if(j == -1 || (*this)[i] == pattern[j])
+		{
+			j++;
+			if(j == pattern.length)
+			{
+				return i - pattern.length + 1;
+			}
+			i++;
+		}
+		else
+		{
+			j = next[j];
+		}
+	}
+
+	delete next;
+
+	return -1;
+}
+
+int String::find(const char* pattern)const
+{
+	return find(String(pattern));
+}

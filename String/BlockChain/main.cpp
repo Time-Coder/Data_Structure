@@ -2,7 +2,7 @@
 
 int main()
 {
-	String str = "0123456789";
-	cout << str << endl;
+	String str = "aabaabaaaa";
+	cout << str.find("aca") << endl;
 	return 0;
 }

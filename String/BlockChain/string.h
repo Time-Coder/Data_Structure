@@ -17,6 +17,7 @@ private:
 	};
 
 	Block* creat_block();
+	
 
 	Block *first = NULL;
 	Block *last = NULL;
@@ -35,7 +36,8 @@ public:
 	char& operator [](int i); // finished
 	char operator [](int i)const; // finished
 	String operator +(const String& str);
-	int find(const String& pattern);
+	int find(const String& pattern)const;
+	int find(const char* pattern)const;
 	friend ostream& operator <<(ostream& out, String str); // finished
 
 	class iterator // finished
