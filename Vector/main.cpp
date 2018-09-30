@@ -45,9 +45,8 @@ int main()
 	// print_vector_info(v8, "v8");
 
 	Vector<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-	// cout << v << endl;
-	cout << v.unsort() << endl;
-	cout << v.sort() << endl;
-
+	cout << v << endl;
+	v.unsort();
+	cout << v << endl;
 	return 0;
 }

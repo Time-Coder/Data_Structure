@@ -50,11 +50,11 @@ public:
 	int find(const DataType& x);
 	int find(const DataType& x, int lower, int upper);
 
-	bool sorted()const;
-	Vector<DataType>& sort();
-	Vector<DataType>& sort(int lower, int upper);
-	Vector<DataType>& unsort();
-	Vector<DataType>& unsort(int lower, int upper);
+	bool sorted()const; // tested
+	Vector<DataType>& sort(); // tested
+	Vector<DataType>& sort(int lower, int upper); // tested
+	Vector<DataType>& unsort(); // tested
+	Vector<DataType>& unsort(int lower, int upper); // tested
 
 	int uniquify();
 
