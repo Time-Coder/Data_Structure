@@ -9,7 +9,7 @@ int main()
 	tree.insert_rchild(node, 'L');
 
 	node = tree.insert_rchild(tree.root(), 'C');
-	tree.insert_rchild(node, 'F');
+	tree.insert_rchild(node, 'F'); // tested
 	tree.attach_lchild(node, tree);
 	tree.show("Origine");
 	cout << tree.size() << endl;
@@ -19,6 +19,6 @@ int main()
 	cout << tree.size() << endl;
 	subtree.show("Subtree");
 	cout << subtree.size() << endl;
-	
+
 	return 0;
 }
