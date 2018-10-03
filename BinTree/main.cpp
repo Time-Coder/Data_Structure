@@ -22,7 +22,7 @@ int main()
 	node = node->parent;
 	node = tree.insert_rchild(node, 'p');
 	node = tree.insert_lchild(node, 'o');
-
+	tree.show();
 	tree.trav_method(BinTree<char>::IN);
 	for(BinTree<char>::iterator it = tree.rear(); it != tree.end(); it--)
 	{
