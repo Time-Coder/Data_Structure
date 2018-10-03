@@ -25,7 +25,7 @@ public:
 		_data(data), _parent(parent), _lchild(lchild), _rchild(rchild){} // tested
 		~Node(){_parent = NULL; _lchild = NULL; _rchild = NULL;} // tested
 		int size()const; // tested
-		int height()const;
+		int height()const; // tested
 		Node*& lchild();
 		Node*& rchild();
 		Node*& parent();
