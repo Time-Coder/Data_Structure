@@ -38,7 +38,7 @@ public:
 		bool isroot()const; // finished
 		bool islchild()const; // finished
 		bool isrchild()const; // finished
-		Node* brother()const;
+		Node* brother()const; // finished
 		bool belong_to(const BinTree<DataType>& tree)const; // finished
 		Node* insert_lchild(const DataType& value); // finished
 		Node* insert_rchild(const DataType& value); // finished
