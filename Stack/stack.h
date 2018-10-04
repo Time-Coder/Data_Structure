@@ -20,10 +20,6 @@
 
 using namespace std;
 
-// Convert a variable X of type "DataType" into string in cout format.
-template<typename DataType>
-string cout2string(const DataType& element);
-
 // Define struct "StackNode" to store a stack element.
 template<typename DataType>
 class StackNode
@@ -66,11 +62,11 @@ class Stack
 		else
 		{
 			DataType longest_element = S1.pop();
-			string longest_string = cout2string(longest_element);
+			string longest_string = Stack::cout2string(longest_element);
 			while( !S1.empty() )
 			{
 				DataType temp_element = S1.pop();
-				string temp_string = cout2string(temp_element);
+				string temp_string = Stack::cout2string(temp_element);
 				if( temp_string.size() > longest_string.size() )
 				{
 					longest_string = temp_string;
@@ -82,7 +78,7 @@ class Stack
 				DataType temp_element = S2.pop();
 				o << "| " << temp_element << " ";
 				int i = 0;
-				string temp_string = cout2string(temp_element);
+				string temp_string = Stack::cout2string(temp_element);
 
 				while(i != longest_string.size()-temp_string.size())
 				{
@@ -101,6 +97,14 @@ class Stack
 		}	
 
 		return o;
+	}
+
+public:
+	static string cout2string(const DataType& element)
+	{
+	    ostringstream oss;
+	    oss << element;
+	    return oss.str();
 	}
 
 private:
@@ -192,17 +196,6 @@ public:
     // Return: A reference to current stack.
 	Stack<DataType>& inverse();
 };
-
-//-------------------------------------------------------------------------------
-
-// Convert a variable X of type "DataType" into string in cout format.
-template<typename DataType>
-string cout2string(const DataType& element)
-{
-    ostringstream oss;
-    oss << element;
-    return oss.str();
-}
 
 //-------------------------------------------------------------------------------
 

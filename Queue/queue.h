@@ -9,14 +9,6 @@
 using namespace std;
 
 template<typename DataType>
-string cout2string(const DataType& element)
-{
-    ostringstream oss;
-    oss << element;
-    return oss.str();
-}
-
-template<typename DataType>
 class Queue
 {
 	friend ostream & operator <<(ostream &o, const Queue<DataType>& queue)
@@ -35,11 +27,11 @@ class Queue
 		}
 
 		DataType longest_element = queue1.pop();
-		string longest_string = cout2string(longest_element);
+		string longest_string = Queue::cout2string(longest_element);
 		while( !queue1.empty() )
 		{
 			DataType temp_element = queue1.pop();
-			string temp_string = cout2string(temp_element);
+			string temp_string = Queue::cout2string(temp_element);
 			if( temp_string.size() > longest_string.size() )
 			{
 				longest_string = temp_string;
@@ -51,7 +43,7 @@ class Queue
 			DataType temp_element = queue2.pop();
 			o << "| " << temp_element << " ";
 			unsigned i = 0;
-			string temp_string = cout2string(temp_element);
+			string temp_string = Queue::cout2string(temp_element);
 
 			while(i != longest_string.size()-temp_string.size())
 			{
@@ -79,6 +71,14 @@ private:
 
 	Node* creat_node();
 	Node* creat_node(DataType element);
+
+public:
+	static string cout2string(const DataType& element)
+	{
+	    ostringstream oss;
+	    oss << element;
+	    return oss.str();
+	}
 
 private:
 	Node *head = NULL; // Point to head node(not the first node)
