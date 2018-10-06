@@ -1,0 +1,37 @@
+graph
+{
+	0--1;
+	0--2;
+	0--3;
+	0--4;
+	4--5;
+	4--6;
+	4--7;
+	3--8;
+	3--9;
+	3--10;
+	2--11;
+	2--12;
+	2--13;
+	1--14;
+	1--15;
+	1--16;
+
+	14[shape="circle",label="C1"];
+	15[shape="circle",label="C2"];
+	16[shape="circle",label="C3"];
+	1[shape="circle",label="B1"];
+	11[shape="circle",label="C4"];
+	12[shape="circle",label="C5"];
+	13[shape="circle",label="C6"];
+	2[shape="circle",label="B2"];
+	8[shape="circle",label="C7"];
+	9[shape="circle",label="C8"];
+	10[shape="circle",label="C9"];
+	3[shape="circle",label="B3"];
+	5[shape="circle",label="C10"];
+	6[shape="circle",label="C11"];
+	7[shape="circle",label="C12"];
+	4[shape="circle",label="B4"];
+	0[shape="circle",label="A1"];
+}

@@ -1,0 +1,55 @@
+graph
+{
+	0--1;
+	0--2;
+	0--3;
+	3--4;
+	3--5;
+	3--6;
+	6--7;
+	7--8;
+	7--9;
+	7--10;
+	10--11;
+	10--12;
+	10--13;
+	9--14;
+	9--15;
+	9--16;
+	8--17;
+	8--18;
+	8--19;
+	2--20;
+	2--21;
+	2--22;
+	1--23;
+	1--24;
+	1--25;
+
+	23[shape="circle",label="C1"];
+	24[shape="circle",label="C2"];
+	25[shape="circle",label="C3"];
+	1[shape="circle",label="B1"];
+	20[shape="circle",label="C7"];
+	21[shape="circle",label="C8"];
+	22[shape="circle",label="C9"];
+	2[shape="circle",label="B3"];
+	4[shape="circle",label="C10"];
+	5[shape="circle",label="C11"];
+	17[shape="circle",label="C1"];
+	18[shape="circle",label="C2"];
+	19[shape="circle",label="C3"];
+	8[shape="circle",label="B1"];
+	14[shape="circle",label="C7"];
+	15[shape="circle",label="C8"];
+	16[shape="circle",label="C9"];
+	9[shape="circle",label="B3"];
+	11[shape="circle",label="C10"];
+	12[shape="circle",label="C11"];
+	13[shape="circle",label="C12"];
+	10[shape="circle",label="B4"];
+	7[shape="circle",label="A1"];
+	6[shape="circle",label="C12"];
+	3[shape="circle",label="B4"];
+	0[shape="circle",label="A1"];
+}

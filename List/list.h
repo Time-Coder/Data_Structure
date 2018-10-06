@@ -313,7 +313,7 @@ typename List<DataType>::iterator List<DataType>::find(const DataType& element)c
 	List<DataType>::iterator it;
 	for(it = begin(); it != end(); it++)
 	{
-		if(it->data == element)
+		if(*it == element)
 		{
 			break;
 		}
@@ -405,6 +405,7 @@ typename List<DataType>::iterator List<DataType>::erase(iterator it)
 			Node* q = p->link;
 			p->link = q->link;
 			delete q;
+			length--;
 			return iterator(p->link);
 		}
 	}
