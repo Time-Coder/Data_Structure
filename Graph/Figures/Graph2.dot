@@ -1,0 +1,9 @@
+digraph
+{
+	0->1;
+	0->2[dir="both"];
+
+	0[shape="circle",label="B"];
+	1[shape="circle",label="C"];
+	2[shape="circle",label="D"];
+}

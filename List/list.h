@@ -6,105 +6,59 @@
 
 using namespace std;
 
-template<typename DataType>
-class ListNode
-{
-public:
-	DataType data;
-	ListNode<DataType> *link = NULL;
-
-public:
-	ListNode<DataType>(){}
-	ListNode<DataType>(DataType element)
-	{
-		data = element;
-	}
-	ListNode<DataType>(DataType element, ListNode<DataType> *ptr)
-	{
-		data = element;
-		link = ptr;
-	}
-	~ListNode<DataType>()
-	{
-		link = NULL;
-	}
-};
-
-template<class Class, typename DataType>
-class ListIterator : public iterator<input_iterator_tag, Class>
-{
-private:
-	Class* _ptr = NULL;
-
-public:
-	ListIterator()
-	{
-		_ptr = NULL;
-	}
-
-	ListIterator(Class *p)
-	{
-		_ptr = p;
-	}
-
-	~ListIterator()
-	{
-		_ptr = NULL;
-	}
-
-    ListIterator& operator =(const ListIterator& it)
-    {
-        _ptr = it._ptr;
-    }
-
-    bool operator !=(const ListIterator& it)
-    {
-        return (_ptr != it._ptr);
-    }
-
-    bool operator ==(const ListIterator& it)
-    {
-        return (_ptr == it._ptr);
-    }
-
-    ListIterator& operator ++()
-    {
-        _ptr = _ptr->link;
-        return *this;
-    }
-
-    ListIterator operator ++(int)
-    {
-        ListIterator temp = *this;
-        _ptr = _ptr->link;
-        return temp;
-    }
-
-    DataType& operator *()
-    {
-        return _ptr->data;
-    }
-};
-
-template<typename DataType>
+template<class DataType>
 class List
 {
-	friend ostream & operator <<(ostream& out, const List<DataType>& list)
-	{
-		for(List<DataType>::iterator it = list.begin(); it != list.end(); it++)
-		{
-			out << (*it) << endl;
-		}
-
-		return out;
-	}
-
 private:
-	ListNode<DataType> *head = NULL;
-	int length = 0;
+	class Node
+	{
+	public:
+		DataType data;
+		Node *link = NULL;
+
+	public:
+		Node(){}
+		Node(const DataType& element) : data(element){}
+		Node(const DataType& element, Node *ptr) : data(element), link(ptr) {}
+		~Node(){link = NULL;}
+	};
 
 public:
-	typedef ListIterator< ListNode<DataType>, DataType > iterator;
+	class iterator
+	{
+	private:
+		Node* _ptr = NULL;
+
+	public:
+		iterator() : _ptr(NULL){}
+		iterator(Node *p) : _ptr(p){}
+	    iterator& operator =(const iterator& it){_ptr = it._ptr;}
+	    bool operator !=(const iterator& it){return (_ptr != it._ptr);}
+	    bool operator ==(const iterator& it){return (_ptr == it._ptr);}
+	    bool operator ==(Node* ptr){return _ptr == ptr;}
+	    bool operator !=(Node* ptr){return _ptr != ptr;}
+	    DataType& operator *(){return _ptr->data;}
+	    DataType* operator ->(){return &(_ptr->data);}
+	    DataType* ptr(){return &(_ptr->data);}
+
+	    iterator& operator ++()
+	    {
+	        _ptr = _ptr->link;
+	        return *this;
+	    }
+
+	    iterator operator ++(int)
+	    {
+	        iterator temp = *this;
+	        _ptr = _ptr->link;
+	        return temp;
+	    }
+	};
+
+private:
+	Node *head = NULL; // point to head node (not the first node, before first node)
+	Node *_rear = NULL; // point to last node
+	int length = 0;
 
 public:
 	List<DataType>(); // finished, tested
@@ -118,35 +72,50 @@ public:
 	bool empty()const; // finished, tested
 	DataType& operator [](int i); // finished, tested
 	DataType operator [](int i)const; // finished, tested
-	int locate(DataType element)const; // finished, tested
-	bool insert(int i, DataType element); // finished, tested
-	bool erase(int i); // finished, tested
-	void push_back(DataType element); // finished, tested
-	void push_front(DataType element); // finished, tested
+	List<DataType>::iterator find(const DataType& element)const; // finished, tested
+	List<DataType>::iterator locate(int i)const;
+	int locate(List<DataType>::iterator it)const;
+	int locate(DataType* ptr)const;
+	bool insert(int i, const DataType& element); // finished, tested
+	iterator erase(int i); // finished, tested
+	iterator erase(DataType* ptr);
+	iterator erase(iterator it);
+	void push_back(const DataType& element); // finished, tested
+	void push_front(const DataType& element); // finished, tested
 	DataType pop_back(); // finished, tested
 	DataType pop_front(); // finished, tested
 	bool swap(int i, int j); // finished, tested
 	List<DataType> cat(const List<DataType>& list); // finished, tested
 	iterator begin()const; // finished, tested
 	iterator end()const; // finished, tested
+	iterator rear()const;
+
+	template<class ElemType>
+	friend ostream & operator <<(ostream& out, const List<ElemType>& list);
 };
 
-template<typename DataType>
+template<class DataType>
 typename List<DataType>::iterator List<DataType>::begin()const
 {
 	return iterator(head->link);
 }
 
-template<typename DataType>
+template<class DataType>
 typename List<DataType>::iterator List<DataType>::end()const
 {
 	return iterator(NULL);
 }
 
-template<typename DataType>
+template<class DataType>
+typename List<DataType>::iterator List<DataType>::rear()const
+{
+	return iterator(_rear);
+}
+
+template<class DataType>
 List<DataType>::List()
 {
-	head = new ListNode<DataType>;
+	head = new Node;
 	if(!head)
 	{
 		cerr << "Failed to allocate memory!" << endl;
@@ -154,7 +123,7 @@ List<DataType>::List()
 	}
 }
 
-template<typename DataType>
+template<class DataType>
 List<DataType>::List(int n)
 {
 	if(n < 0)
@@ -164,27 +133,28 @@ List<DataType>::List(int n)
 		exit(-1);
 	}
 
-	head = new ListNode<DataType>;
+	head = new Node;
 	if(!head)
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
 
-	ListNode<DataType>* p = head;
+	Node* p = head;
 	for(int i = 0; i < n; i++, p = p->link)
 	{
-		p->link = new ListNode<DataType>;
+		p->link = new Node;
 		if(!(p->link))
 		{
 			cerr << "Failed to allocate memory!" << endl;
 			exit(-1);
 		}
 	}
+	_rear = p;
 	length = n;
 }
 
-template<typename DataType>
+template<class DataType>
 List<DataType>::List(int n, DataType element)
 {
 	if(n < 0)
@@ -194,41 +164,42 @@ List<DataType>::List(int n, DataType element)
 		exit(-1);
 	}
 
-	head = new ListNode<DataType>;
+	head = new Node;
 	if(!head)
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
 
-	ListNode<DataType>* p = head;
+	Node* p = head;
  	for(int i = 0; i < n; i++, p = p->link)
 	{
-		p->link = new ListNode<DataType>(element);
+		p->link = new Node(element);
 		if(!(p->link))
 		{
 			cerr << "Failed to allocate memory!" << endl;
 			exit(-1);
 		}
 	}
+	_rear = p;
 	length = n;
 }
 
-template<typename DataType>
+template<class DataType>
 List<DataType>::List(const List<DataType>& list)
 {
-	head = new ListNode<DataType>;
+	head = new Node;
 	if(!head)
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
 
-	ListNode<DataType> *p = head;
-	ListNode<DataType> *q = list.head;
+	Node *p = head;
+	Node *q = list.head;
 	while(q->link)
 	{
-		p->link = new ListNode<DataType>(q->link->data);
+		p->link = new Node(q->link->data);
 		if(!(p->link))
 		{
 			cerr << "Failed to allocate memory!" << endl;
@@ -237,31 +208,38 @@ List<DataType>::List(const List<DataType>& list)
 		p = p->link;
 		q = q->link;
 	}
+	_rear = p;
 	length = list.length;
 }
 
-template<typename DataType>
+template<class DataType>
 List<DataType>::~List()
 {
-	while(head->link != NULL)
+	if(!head)
 	{
-		ListNode<DataType>* p = head->link;
+		return;
+	}
+	
+	while(head->link)
+	{
+		Node* p = head->link;
 		head->link = p->link;
 		delete p;
 	}
 	delete head;
+	head = NULL;
 }
 
-template<typename DataType>
+template<class DataType>
 List<DataType>& List<DataType>::operator =(const List<DataType>& list)
 {
 	clear();
 
-	ListNode<DataType> *p = head;
-	ListNode<DataType> *q = list.head;
+	Node *p = head;
+	Node *q = list.head;
 	while(q->link)
 	{
-		p->link = new ListNode<DataType>(q->link->data);
+		p->link = new Node(q->link->data);
 		if(!(p->link))
 		{
 			cerr << "Failed to allocate memory!" << endl;
@@ -271,35 +249,37 @@ List<DataType>& List<DataType>::operator =(const List<DataType>& list)
 		q = q->link;
 	}
 	length = list.length;
+	_rear = p;
 
 	return *this;
 }
 
-template<typename DataType>
+template<class DataType>
 void List<DataType>::clear()
 {
 	while(head->link != NULL)
 	{
-		ListNode<DataType>* p = head->link;
+		Node* p = head->link;
 		head->link = p->link;
 		delete p;
 	}
 	length = 0;
+	_rear = NULL;
 }
 
-template<typename DataType>
+template<class DataType>
 int List<DataType>::size()const
 {
 	return length;
 }
 
-template<typename DataType>
+template<class DataType>
 bool List<DataType>::empty()const
 {
 	return (length == 0);
 }
 
-template<typename DataType>
+template<class DataType>
 DataType& List<DataType>::operator [](int n)
 {
 	if(n < 0 || n >= length)
@@ -308,12 +288,12 @@ DataType& List<DataType>::operator [](int n)
 			 << "Index \'n\' is out of list range." << endl;
 		exit(-1);
 	}
-	ListNode<DataType> *p = head->link;
+	Node *p = head->link;
 	for(int i = 0; i < n; i++, p = p->link){}
 	return p->data;
 }
 
-template<typename DataType>
+template<class DataType>
 DataType List<DataType>::operator [](int n)const
 {
 	if(n < 0 || n >= length)
@@ -322,30 +302,69 @@ DataType List<DataType>::operator [](int n)const
 			 << "Index \'n\' is out of list range." << endl;
 		exit(-1);
 	}
-	ListNode<DataType> *p = head->link;
+	Node *p = head->link;
 	for(int i = 0; i < n; i++, p = p->link){}
 	return p->data;
 }
 
-template<typename DataType>
-int List<DataType>::locate(DataType element)const
+template<class DataType>
+typename List<DataType>::iterator List<DataType>::find(const DataType& element)const
+{
+	List<DataType>::iterator it;
+	for(it = begin(); it != end(); it++)
+	{
+		if(it->data == element)
+		{
+			break;
+		}
+	}
+	return it;
+}
+
+template<class DataType>
+typename List<DataType>::iterator List<DataType>::locate(int i)const
+{
+	List<DataType>::iterator it;
+	for(it = begin(); it != end(); it++, i--)
+	{
+		if(i == 0)
+		{
+			break;
+		}
+	}
+	return it;
+}
+
+template<class DataType>
+int List<DataType>::locate(List<DataType>::iterator it)const
 {
 	int i = 0;
-	ListNode<DataType> *p = head->link;
-	while(p)
+	for(List<DataType>::iterator subit = begin(); subit != end(); subit++, i++)
 	{
-		if(p->data == element)
+		if(subit == it)
 		{
 			return i;
 		}
-		i++;
-		p = p->link;
 	}
 	return -1;
 }
 
-template<typename DataType>
-bool List<DataType>::insert(int n, DataType element)
+template<class DataType>
+int List<DataType>::locate(DataType* ptr)const
+{
+	int i = 0;
+	for(List<DataType>::iterator it = begin(); it != end(); it++, i++)
+	{
+		if(&(*it) == ptr)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+template<class DataType>
+bool List<DataType>::insert(int n, const DataType& element)
 {
 	if(n > length || n < 0)
 	{
@@ -353,68 +372,107 @@ bool List<DataType>::insert(int n, DataType element)
 			 << "\'n\' is not in [0, length]. Nothing has been done." << endl;
 		return false;
 	}
-	ListNode<DataType> *p = head;
+	Node *p = head;
 	for(int i = 0; i < n; i++, p = p->link){}
-	ListNode<DataType> *q = p->link;
-	p->link = new ListNode<DataType>(element, q);
+	Node *q = p->link;
+	p->link = new Node(element, q);
 	if(!(p->link))
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
+	if(n == length)
+	{
+		_rear = p->link;
+	}
 	length++;
 	return true;
 }
 
-template<typename DataType>
-bool List<DataType>::erase(int n)
+template<class DataType>
+typename List<DataType>::iterator List<DataType>::erase(DataType* ptr)
+{
+	return erase(locate(ptr));
+}
+
+template<class DataType>
+typename List<DataType>::iterator List<DataType>::erase(iterator it)
+{
+	for(Node* p = head; p != NULL; p = p->link)
+	{
+		if(it == p->link)
+		{
+			Node* q = p->link;
+			p->link = q->link;
+			delete q;
+			return iterator(p->link);
+		}
+	}
+	return end();
+}
+
+template<class DataType>
+typename List<DataType>::iterator List<DataType>::erase(int n)
 {
 	if(n >= length || n < 0)
 	{
-		cout << "Warning in bool List<DataType>::erase(int n)" << endl
+		cout << "Error in bool List<DataType>::erase(int n)" << endl
 			 << "\'n\' is not in [0, length-1]. Nothing has been done." << endl;
-		return false;
+		exit(-1);
 	}
-	ListNode<DataType> *p = head;
-	for(int i = 0; i < n; i++, p = p->link){}
-	ListNode<DataType> *q = p->link;
+	Node *p = head;
+	for(int i = 0; i < n; i++){p = p->link;}
+	Node *q = p->link;
 	p->link = q->link;
 	delete q;
+	if(n == length-1)
+	{
+		_rear = p;
+		if(_rear == head)
+		{
+			_rear = NULL;
+		}
+	}
 	length--;
-	return true;
+	return iterator(p->link);
 }
 
-template<typename DataType>
-void List<DataType>::push_back(DataType element)
+template<class DataType>
+void List<DataType>::push_back(const DataType& element)
 {
-	ListNode<DataType> *p = head;
+	Node *p = head;
 	while(p->link)
 	{
 		p = p->link;
 	}
-	p->link = new ListNode<DataType>(element);
+	p->link = new Node(element);
 	if(!(p->link))
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
+	_rear = p->link;
 	length++;
 }
 
-template<typename DataType>
-void List<DataType>::push_front(DataType element)
+template<class DataType>
+void List<DataType>::push_front(const DataType& element)
 {
-	ListNode<DataType> *p = head->link;
-	head->link = new ListNode<DataType>(element, p);
+	Node *p = head->link;
+	head->link = new Node(element, p);
 	if(!(head->link))
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
+	if(length == 0)
+	{
+		_rear = head->link;
+	}
 	length++;
 }
 
-template<typename DataType>
+template<class DataType>
 DataType List<DataType>::pop_back()
 {
 	if(length == 0)
@@ -424,7 +482,7 @@ DataType List<DataType>::pop_back()
 		exit(-1);
 	}
 
-	ListNode<DataType> *p = head;
+	Node *p = head;
 	while(p->link->link)
 	{
 		p = p->link;
@@ -433,11 +491,16 @@ DataType List<DataType>::pop_back()
 	DataType element = p->link->data;
 	delete p->link;
 	p->link = NULL;
+	_rear = p;
+	if(_rear == head)
+	{
+		_rear = NULL;
+	}
 	length--;
 	return element;
 }
 
-template<typename DataType>
+template<class DataType>
 DataType List<DataType>::pop_front()
 {
 	if(length == 0)
@@ -446,27 +509,31 @@ DataType List<DataType>::pop_front()
 		exit(-1);
 	}
 
-	ListNode<DataType> *p = head->link;
+	Node *p = head->link;
 	DataType element = p->data;
 	head->link = p->link;
 	delete p;
+	if(head->link == NULL)
+	{
+		_rear = NULL;
+	}
 	length--;
 	return element;
 }
 
-template<typename DataType>
+template<class DataType>
 List<DataType> List<DataType>::cat(const List<DataType>& list)
 {
-	ListNode<DataType> *p = head;
+	Node *p = head;
 	while(p->link)
 	{
 		p = p->link;
 	}
 
-	ListNode<DataType> *q = list.head->link;
+	Node *q = list.head->link;
 	while(q)
 	{
-		p->link = new ListNode<DataType>(q->data);
+		p->link = new Node(q->data);
 		if(!(p->link))
 		{
 			cerr << "Failed to allocate memory!" << endl;
@@ -475,11 +542,12 @@ List<DataType> List<DataType>::cat(const List<DataType>& list)
 		p = p->link;
 		q = q->link;
 	}
+	_rear = p;
 	length += list.length;
 	return *this;
 }
 
-template<typename DataType>
+template<class DataType>
 bool List<DataType>::swap(int i, int j)
 {
 	if(i < 0 || i >= length || j < 0 || j >= length || i == j)
@@ -493,14 +561,20 @@ bool List<DataType>::swap(int i, int j)
 		std::swap(i, j);
 	}
 
-	ListNode<DataType> *pi_last = head;
-	for(int it = 0; it < i; it++, pi_last = pi_last->link){}
-	ListNode<DataType> *pj_last = head;
-	for(int it = 0; it < j; it++, pj_last = pj_last->link){}
+	Node *pi_last = head;
+	for(int it = 0; it < i; it++){pi_last = pi_last->link;}
 
-	ListNode<DataType> *pi = pi_last->link;
-	ListNode<DataType> *pj = pj_last->link;
-	ListNode<DataType> *pj_next = pj->link;
+	Node *pj_last = head;
+	for(int it = 0; it < j; it++){pj_last = pj_last->link;}
+
+	Node *pi = pi_last->link;
+	Node *pj = pj_last->link;
+	if(!(pj->link))
+	{
+		_rear = pi;
+	}
+
+	Node *pj_next = pj->link;
 
 	if(j-i > 1)
 	{
@@ -517,6 +591,17 @@ bool List<DataType>::swap(int i, int j)
 	}
 
 	return true;
+}
+
+template<class DataType>
+ostream & operator <<(ostream& out, const List<DataType>& list)
+{
+	for(typename List<DataType>::iterator it = list.begin(); it != list.end(); it++)
+	{
+		out << (*it) << endl;
+	}
+
+	return out;
 }
 
 #endif

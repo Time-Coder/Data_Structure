@@ -140,7 +140,7 @@ Matrix<DataType>::~Matrix()
 	n_cols = 0;
 	if(data)
 	{
-		delete data;
+		delete[] data;
 		data = NULL;
 	}
 }
@@ -152,7 +152,7 @@ void Matrix<DataType>::clear()
 	n_cols = 0;
 	if(data)
 	{
-		delete data;
+		delete[] data;
 		data = NULL;
 	}
 }
