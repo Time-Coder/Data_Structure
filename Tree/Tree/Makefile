@@ -1,4 +1,8 @@
-INCLUDE := -I. -I../../List -I../../Stack
+INCLUDE := -I. \
+		   -I../../List/List \
+		   -I../../Queue/Queue \
+		   -I../../Stack \
+		   -I../BinTree
 
 all: main
 

@@ -6,8 +6,18 @@
 
 #include <list.h>
 #include <stack.h>
+#include <bintree.h>
 
 using namespace std;
+
+template<class DataType>
+class BinTree;
+
+template<class DataType>
+class BinForest;
+
+template<class DataType>
+class Forest;
 
 template<class DataType>
 class Tree
@@ -21,18 +31,18 @@ public:
 		List<Node*> children;
 
 	public:
-		Node(){} // finished, tested
+		Node(){}
 		Node(const DataType& _data, Node *_parent = NULL) :
-		data(_data), parent(_parent){} // finished, tested
-		~Node(){parent = NULL;} // finished, tested
-		int size()const; // finished, tested
-		int height()const; // finished, tested
-		int level()const; // finished, tested
-		bool isleaf()const; // finished, tested
-		bool isroot()const; // finished, tested
-		bool belong_to(const Tree<DataType>& tree)const; // finished, tested
-		Node* append_child(const DataType& value); // finished, tested
-		Node* insert_child(int i, const DataType& value); // finished, tested
+		data(_data), parent(_parent){}
+		~Node(){parent = NULL;}
+		int size()const;
+		int height()const;
+		int level()const;
+		bool isleaf()const;
+		bool isroot()const;
+		bool belong_to(const Tree<DataType>& tree)const;
+		Node* append_child(const DataType& value);
+		Node* insert_child(int i, const DataType& value);
 	};
 
 private:
@@ -40,38 +50,61 @@ private:
 	int _size = 0;
 
 private:
-	static Node* new_Node(const DataType& value, Node* parent = NULL); // finished, tested
-	bool bad_node(Node* node, const string& message, const string& function_name); // finished, tested
+	static Node* new_Node(const DataType& value, Node* parent = NULL);
+	bool bad_node(Node* node, const string& message, const string& function_name);
 
 public:
-	Tree(){} // finished, tested
-	Tree(const Tree<DataType>& tree); // finished, tested
-	~Tree(); // finished, tested
+	Tree(){}
+	Tree(const Tree<DataType>& tree);
+	Tree(const BinTree<DataType>& tree);
+	Tree(const Forest<DataType>& forest);
+	Tree(const BinForest<DataType>& forest);
 
-	void clear(); // finished, tested
-	int size()const{return _size;} // finished
-	int height()const{return _root->height();} // finished
-	bool empty()const{return !_root;} // finished
-	bool has_node(const Node& node)const{return node.belong_to(*this);} // finished
-	bool has_node(Node* node)const{return node->belong_to(*this);} // finished
-	Node* root()const{return _root;} // finished, tested
+	Tree<DataType>& operator =(const Tree<DataType>& tree);
+	Tree<DataType>& operator =(const BinTree<DataType>& tree);
+	Tree<DataType>& operator =(const Forest<DataType>& forest);
+	Tree<DataType>& operator =(const BinForest<DataType>& forest);
 
-	Node* insert_root(const DataType& value); // finished, tested
-	Node* append_child(Node* node, const DataType& value); // finished, tested
-	Node* insert_child(Node* node, int i, const DataType& value); // finished, tested
-	Node* attach(Node* node, const Tree<DataType>& tree); // finished, tested
-	Node* attach(Node* node, int i, const Tree<DataType>& tree); // finished, tested
+	~Tree();
 
-	int remove(Node* node); // finished, tested
-	Tree<DataType>& secede(Node* node); // finished, tested
-	Tree<DataType> subtree(Node* node); // finished, tested
-	Tree<DataType>& operator =(const Tree<DataType>& tree); // finished, tested
-	void show(const string& filename = "Tree")const; // finished, tested
-	void write(const string& filename)const; // finished, tested
+	void clear();
+	int size()const{return _size;}
+	int height()const{return _root->height();}
+	bool empty()const{return !_root;}
+	bool has_node(const Node& node)const{return node.belong_to(*this);}
+	bool has_node(Node* node)const{return node->belong_to(*this);}
+	Node* root()const{return _root;}
+
+	Node* insert_root(const DataType& value);
+	Node* append_child(Node* node, const DataType& value);
+	Node* insert_child(Node* node, int i, const DataType& value);
+	Node* attach(Node* node, const Tree<DataType>& tree);
+	Node* attach(Node* node, int i, const Tree<DataType>& tree);
+
+	int remove(Node* node);
+	Tree<DataType>& secede(Node* node);
+	Tree<DataType> subtree(Node* node);
+
+	void show(const string& filename = "Tree")const;
+	void write(const string& filename)const;
 };
 
 template<class DataType>
-class Forest: public List< Tree<DataType> >{};
+class Forest: public List< Tree<DataType> >
+{
+public:
+	Forest() : List< Tree<DataType> >() {}
+	Forest(const Forest<DataType>& forest) : List< Tree<DataType> >(forest) {}
+	Forest(int n, const Tree<DataType>& tree) : List< Tree<DataType> >(n, tree) {}
+	Forest(int n) : List< Tree<DataType> >(n) {}
+	Forest(const BinForest<DataType>& forest);
+	Forest(const Tree<DataType>& tree);
+	Forest(const BinTree<DataType>& tree);
+
+	Forest<DataType>& operator =(const BinForest<DataType>& forest);
+	Forest<DataType>& operator =(const Tree<DataType>& tree);
+	Forest<DataType>& operator =(const BinTree<DataType>& tree);
+};
 
 #include "tree.cpp"
 #endif

@@ -178,6 +178,46 @@ BinTree<DataType>::BinTree(const BinTree<DataType>& tree)
 }
 
 template<class DataType>
+BinTree<DataType>::BinTree(const Tree<DataType>& tree)
+{
+	_root = new_Node(tree.root()->data);
+
+	Stack<typename Tree<DataType>::Node*> src_stack;
+	Stack<Node*> dest_stack;
+
+	src_stack.push(tree.root());
+	dest_stack.push(_root);
+
+	while(!src_stack.empty())
+	{
+		typename Tree<DataType>::Node* src_node = src_stack.pop();
+		Node* dest_node = dest_stack.pop();
+
+		if(src_node->children.empty())
+		{
+			continue;
+		}
+
+		auto it = src_node->children.begin();
+		dest_node->lchild = new_Node((*it)->data, dest_node);
+		dest_node = dest_node->lchild;
+
+		dest_stack.push(dest_node);
+		src_stack.push(*it);
+
+		it++;
+		for(; it != src_node->children.end(); it++)
+		{
+			dest_node->rchild = new_Node((*it)->data, dest_node);
+			dest_node = dest_node->rchild;
+			dest_stack.push(dest_node);
+			src_stack.push(*it);
+		}
+	}
+	_size = tree.size();
+}
+
+template<class DataType>
 BinTree<DataType>& BinTree<DataType>::operator =(const BinTree<DataType>& tree)
 {
 	copy(*this, tree);
@@ -565,7 +605,7 @@ void BinTree<DataType>::write(const string& filename)const
 		p_node = stack_all.pop();
 		if(!p_node)
 		{
-			file << "	NULL" << node_name-- << "[shape=\"circle\",label=A,style=\"invis\"];" << endl;
+			file << "	NULL" << node_name-- << "[shape=\"circle\",label=\"A\",style=\"invis\"];" << endl;
 		}
 		else
 		{

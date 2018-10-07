@@ -6,8 +6,18 @@
 
 #include <stack.h>
 #include <queue.h>
+#include <tree.h>
 
 using namespace std;
+
+template<class DataType>
+class Tree;
+
+template<class DataType>
+class Forest;
+
+template<class DataType>
+class BinForest;
 
 template<class DataType>
 class BinTree
@@ -27,21 +37,21 @@ public:
 		Node *prev = NULL;
 	
 	public:
-		Node(){} // tested
+		Node(){}
 		Node(const DataType& _data, Node *_parent = NULL, Node *_lchild = NULL, Node *_rchild = NULL) :
-		data(_data), parent(_parent), lchild(_lchild), rchild(_rchild){} // tested
-		~Node(){parent = NULL; lchild = NULL; rchild = NULL;} // tested
-		int size()const; // tested
-		int height()const; // tested
-		int level()const; // finished
-		bool isleaf()const; // finished
-		bool isroot()const; // finished
-		bool islchild()const; // finished
-		bool isrchild()const; // finished
-		Node* brother()const; // finished
-		bool belong_to(const BinTree<DataType>& tree)const; // finished
-		Node* insert_lchild(const DataType& value); // finished
-		Node* insert_rchild(const DataType& value); // finished
+		data(_data), parent(_parent), lchild(_lchild), rchild(_rchild){}
+		~Node(){parent = NULL; lchild = NULL; rchild = NULL;}
+		int size()const;
+		int height()const;
+		int level()const;
+		bool isleaf()const;
+		bool isroot()const;
+		bool islchild()const;
+		bool isrchild()const;
+		Node* brother()const;
+		bool belong_to(const BinTree<DataType>& tree)const;
+		Node* insert_lchild(const DataType& value);
+		Node* insert_rchild(const DataType& value);
 	};
 
 	class iterator
@@ -92,37 +102,55 @@ private:
 	void trav_level();
 
 public:
-	BinTree(){} // finished
-	BinTree(const BinTree<DataType>& tree); // finished
-	~BinTree(); // finished
+	BinTree(){}
+	BinTree(const BinTree<DataType>& tree);
+	BinTree(const Tree<DataType>& tree); // finished
+	BinTree(const BinForest<DataType>& forest);
+	BinTree(const Forest<DataType>& forest);
+	~BinTree();
 
-	void clear(); // finished
-	int size()const; // finished
-	int height()const; // finished
-	bool empty()const; // finished
-	bool has_node(const Node& node)const; // finished
-	bool has_node(Node* node)const; // finished
-	Node* root()const; // finished, tested
+	BinTree<DataType>& operator =(const BinTree<DataType>& tree);
+	BinTree<DataType>& operator =(const Tree<DataType>& tree);
+	BinTree<DataType>& operator =(const BinForest<DataType>& forest);
+	BinTree<DataType>& operator =(const Forest<DataType>& forest);
 
-	Node* insert_root(const DataType& value); // finished, tested
-	Node* insert_lchild(Node* node, const DataType& value); // finished, tested
-	Node* insert_rchild(Node* node, const DataType& value); // finished, tested
-	Node* attach_lchild(Node* node, const BinTree<DataType>& tree); // finished, tested
-	Node* attach_rchild(Node* node, const BinTree<DataType>& tree); // finished, tested
-	int remove(Node* node); // finished
-	BinTree<DataType>& secede(Node* node); // finished
-	static BinTree<DataType>& subtree(Node* node); // finished
-	BinTree<DataType>& operator =(const BinTree<DataType>& tree); // finished
-	void show(const string& filename = "temp.pdf")const; // finished
-	void write(const string& filename)const; // finished
+	void clear();
+	int size()const;
+	int height()const;
+	bool empty()const;
+	bool has_node(const Node& node)const;
+	bool has_node(Node* node)const;
+	Node* root()const;
+
+	Node* insert_root(const DataType& value);
+	Node* insert_lchild(Node* node, const DataType& value);
+	Node* insert_rchild(Node* node, const DataType& value);
+	Node* attach_lchild(Node* node, const BinTree<DataType>& tree);
+	Node* attach_rchild(Node* node, const BinTree<DataType>& tree);
+	int remove(Node* node);
+	BinTree<DataType>& secede(Node* node);
+	static BinTree<DataType>& subtree(Node* node);
+	void show(const string& filename = "BinTree")const;
+	void write(const string& filename)const;
 
 	void trav_method(TravType method);
-	iterator begin()const; // finished
+	iterator begin()const;
 	iterator rear()const;
-	iterator end()const; // finished
+	iterator end()const;
 };
 
-class BinForest : public List< BinTree<DataType> >{};
+template<class DataType>
+class BinForest : public List< BinTree<DataType> >
+{
+public:
+	BinForest(const BinTree<DataType>& tree);
+	BinForest(const Tree<DataType>& tree);
+	BinForest(const Forest<DataType>& forest);
+
+	BinForest<DataType>& operator =(const BinTree<DataType>& tree);
+	BinForest<DataType>& operator =(const Tree<DataType>& tree);
+	BinForest<DataType>& operator =(const Forest<DataType>& forest);
+};
 
 #include "bintree.cpp"
 #endif

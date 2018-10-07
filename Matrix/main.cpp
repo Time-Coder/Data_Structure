@@ -4,7 +4,7 @@ int main()
 {
 	Matrix<double> A = 10.0 * rand(3);
 	Matrix<double> B = 9.0 * rand(3);
-	cout << (A + B).empty() << endl;
+	cout << (A + B) << endl;
 	// cout << to(3, 6) << endl;
 
 
