@@ -14,9 +14,6 @@ template<class DataType>
 class BinTree;
 
 template<class DataType>
-class BinForest;
-
-template<class DataType>
 class Forest;
 
 template<class DataType>
@@ -54,18 +51,18 @@ private:
 	bool bad_node(Node* node, const string& message, const string& function_name);
 
 public:
+	void write_part1(Stack<Node*>& stack_node2, Stack<int>& stack_number2, int n, ofstream& file)const;
+	void write_part2(Stack<Node*>& stack_node2, Stack<int>& stack_number2, ofstream& file)const;
+
+public:
 	Tree(){}
-	Tree(const Tree<DataType>& tree);
-	Tree(const BinTree<DataType>& tree);
-	Tree(const Forest<DataType>& forest);
-	Tree(const BinForest<DataType>& forest);
+	Tree(const Tree<DataType>& tree); // finished
+	Tree(const BinTree<DataType>& tree); // finished
+	~Tree();
 
 	Tree<DataType>& operator =(const Tree<DataType>& tree);
 	Tree<DataType>& operator =(const BinTree<DataType>& tree);
 	Tree<DataType>& operator =(const Forest<DataType>& forest);
-	Tree<DataType>& operator =(const BinForest<DataType>& forest);
-
-	~Tree();
 
 	void clear();
 	int size()const{return _size;}
@@ -97,13 +94,13 @@ public:
 	Forest(const Forest<DataType>& forest) : List< Tree<DataType> >(forest) {}
 	Forest(int n, const Tree<DataType>& tree) : List< Tree<DataType> >(n, tree) {}
 	Forest(int n) : List< Tree<DataType> >(n) {}
-	Forest(const BinForest<DataType>& forest);
-	Forest(const Tree<DataType>& tree);
-	Forest(const BinTree<DataType>& tree);
+	Forest(BinTree<DataType> bintree); // finished
 
-	Forest<DataType>& operator =(const BinForest<DataType>& forest);
 	Forest<DataType>& operator =(const Tree<DataType>& tree);
 	Forest<DataType>& operator =(const BinTree<DataType>& tree);
+
+	void show(const string& filename = "Forest")const;
+	void write(const string& filename)const;
 };
 
 #include "tree.cpp"

@@ -17,9 +17,6 @@ template<class DataType>
 class Forest;
 
 template<class DataType>
-class BinForest;
-
-template<class DataType>
 class BinTree
 {
 public:
@@ -103,15 +100,13 @@ private:
 
 public:
 	BinTree(){}
-	BinTree(const BinTree<DataType>& tree);
+	BinTree(const BinTree<DataType>& tree); // finished
 	BinTree(const Tree<DataType>& tree); // finished
-	BinTree(const BinForest<DataType>& forest);
-	BinTree(const Forest<DataType>& forest);
+	BinTree(const Forest<DataType>& forest); // finished
 	~BinTree();
 
 	BinTree<DataType>& operator =(const BinTree<DataType>& tree);
 	BinTree<DataType>& operator =(const Tree<DataType>& tree);
-	BinTree<DataType>& operator =(const BinForest<DataType>& forest);
 	BinTree<DataType>& operator =(const Forest<DataType>& forest);
 
 	void clear();
@@ -137,19 +132,6 @@ public:
 	iterator begin()const;
 	iterator rear()const;
 	iterator end()const;
-};
-
-template<class DataType>
-class BinForest : public List< BinTree<DataType> >
-{
-public:
-	BinForest(const BinTree<DataType>& tree);
-	BinForest(const Tree<DataType>& tree);
-	BinForest(const Forest<DataType>& forest);
-
-	BinForest<DataType>& operator =(const BinTree<DataType>& tree);
-	BinForest<DataType>& operator =(const Tree<DataType>& tree);
-	BinForest<DataType>& operator =(const Forest<DataType>& forest);
 };
 
 #include "bintree.cpp"

@@ -1,0 +1,31 @@
+graph BinTree
+{
+	graph[ordering="out"];
+
+	0--1;
+	0--2;
+	2--3;
+	2--4;
+	4--5;
+	4--NULL6[style="invis"];
+	5--7;
+	5--8;
+	1--NULL9[style="invis"];
+	1--10;
+	10--NULL11[style="invis"];
+	10--12;
+
+	12[shape="circle",label="D"];
+	NULL11[shape="circle",label="A",style="invis"];
+	10[shape="circle",label="C"];
+	NULL9[shape="circle",label="A",style="invis"];
+	8[shape="circle",label="I"];
+	7[shape="circle",label="J"];
+	NULL6[shape="circle",label="A",style="invis"];
+	5[shape="circle",label="H"];
+	4[shape="circle",label="G"];
+	3[shape="circle",label="F"];
+	2[shape="circle",label="E"];
+	1[shape="circle",label="B"];
+	0[shape="circle",label="A"];
+}

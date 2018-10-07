@@ -218,6 +218,42 @@ BinTree<DataType>::BinTree(const Tree<DataType>& tree)
 }
 
 template<class DataType>
+BinTree<DataType>::BinTree(const Forest<DataType>& forest)
+{
+	if(forest.empty())
+	{
+		return;
+	}
+
+	auto it = forest.begin();
+	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(*it);
+	if(!ptr_bintree)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+	_root = ptr_bintree->_root;
+	BinTree<DataType>::Node* node = _root;
+	_size += ptr_bintree->_size;
+	it++;
+
+	for(; it != forest.end(); it++)
+	{
+		ptr_bintree = new BinTree<DataType>(*it);
+		if(!ptr_bintree)
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
+
+		node->rchild = ptr_bintree->_root;
+		ptr_bintree->_root->parent = node;
+		node = node->rchild;
+		_size += ptr_bintree->_size;
+	}
+}
+
+template<class DataType>
 BinTree<DataType>& BinTree<DataType>::operator =(const BinTree<DataType>& tree)
 {
 	copy(*this, tree);
@@ -342,6 +378,7 @@ BinTree<DataType>& BinTree<DataType>::secede(Node* p_node)
 			p_node->parent->rchild = NULL;
 		}
 	}
+	p_dest_tree->_root->parent = NULL;
 
 	return *p_dest_tree;
 }
