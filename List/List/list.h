@@ -55,7 +55,7 @@ public:
 	    }
 	};
 
-private:
+protected:
 	Node *head = NULL; // point to head node (not the first node, before first node)
 	Node *_rear = NULL; // point to last node
 	int length = 0;

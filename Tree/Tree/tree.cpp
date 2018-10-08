@@ -435,6 +435,23 @@ Tree<DataType>& Tree<DataType>::operator =(const Tree<DataType>& tree)
 }
 
 template<class DataType>
+Tree<DataType>& Tree<DataType>::operator =(const BinTree<DataType>& bintree)
+{
+	clear();
+	Tree<DataType>& ptr_tree = new Tree<DataType>(bintree);
+	if(!ptr_tree)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	_root = ptr_tree->_root;
+	_size = ptr_tree->_size;
+
+	return *this;
+}
+
+template<class DataType>
 void Tree<DataType>::show(const string& filename)const
 {
 	if(!_root)
@@ -506,6 +523,25 @@ void Tree<DataType>::write(const string& filename)const
 
 	file << "}";
 	file.close();
+}
+
+template<class DataType>
+Forest<DataType>& Forest<DataType>::operator =(const BinTree<DataType>& bintree)
+{
+	this->clear();
+
+	Forest<DataType>* ptr_forest = new Forest<DataType>(bintree);
+	if(!ptr_forest)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	this->head = ptr_forest->head;
+	this->_rear = ptr_forest->_rear;
+	this->length = ptr_forest->length;
+
+	return *this;
 }
 
 template<class DataType>

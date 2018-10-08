@@ -57,12 +57,11 @@ public:
 public:
 	Tree(){}
 	Tree(const Tree<DataType>& tree); // finished
-	Tree(const BinTree<DataType>& tree); // finished
+	Tree(const BinTree<DataType>& bintree); // finished
 	~Tree();
 
-	Tree<DataType>& operator =(const Tree<DataType>& tree);
-	Tree<DataType>& operator =(const BinTree<DataType>& tree);
-	Tree<DataType>& operator =(const Forest<DataType>& forest);
+	Tree<DataType>& operator =(const Tree<DataType>& tree); // finished
+	Tree<DataType>& operator =(const BinTree<DataType>& tree); // finished
 
 	void clear();
 	int size()const{return _size;}
@@ -96,8 +95,7 @@ public:
 	Forest(int n) : List< Tree<DataType> >(n) {}
 	Forest(BinTree<DataType> bintree); // finished
 
-	Forest<DataType>& operator =(const Tree<DataType>& tree);
-	Forest<DataType>& operator =(const BinTree<DataType>& tree);
+	Forest<DataType>& operator =(const BinTree<DataType>& bintree);
 
 	void show(const string& filename = "Forest")const;
 	void write(const string& filename)const;

@@ -262,6 +262,40 @@ BinTree<DataType>& BinTree<DataType>::operator =(const BinTree<DataType>& tree)
 }
 
 template<class DataType>
+BinTree<DataType>& BinTree<DataType>::operator =(const Tree<DataType>& tree)
+{
+	clear();
+	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(tree);
+	if(!ptr_bintree)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	_root = ptr_bintree->_root;
+	_size = ptr_bintree->_size;
+
+	return *this;
+}
+
+template<class DataType>
+BinTree<DataType>& BinTree<DataType>::operator =(const Forest<DataType>& forest)
+{
+	clear();
+	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(forest);
+	if(!ptr_bintree)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	_root = ptr_bintree->_root;
+	_size = ptr_bintree->_size;
+
+	return *this;
+}
+
+template<class DataType>
 BinTree<DataType>::~BinTree()
 {
 	clear();

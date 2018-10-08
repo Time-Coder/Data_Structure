@@ -105,9 +105,9 @@ public:
 	BinTree(const Forest<DataType>& forest); // finished
 	~BinTree();
 
-	BinTree<DataType>& operator =(const BinTree<DataType>& tree);
-	BinTree<DataType>& operator =(const Tree<DataType>& tree);
-	BinTree<DataType>& operator =(const Forest<DataType>& forest);
+	BinTree<DataType>& operator =(const BinTree<DataType>& tree); // finished
+	BinTree<DataType>& operator =(const Tree<DataType>& tree); // finished
+	BinTree<DataType>& operator =(const Forest<DataType>& forest); // finished
 
 	void clear();
 	int size()const;
