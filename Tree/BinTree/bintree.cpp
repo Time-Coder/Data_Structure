@@ -615,22 +615,12 @@ BinTree<DataType>::attach_rchild(BinTree<DataType>::Node* p_node, const BinTree<
 }
 
 template<class DataType>
-void BinTree<DataType>::write(const string& filename)const
+int BinTree<DataType>::write_part1(Stack<Node*>& stack_all, ofstream& file)const
 {
-	if(empty())
-	{
-		cout << "The tree is empty, nothing to write!" << endl;
-		return;
-	}
-
-	ofstream file("Figures/bintree.dot");
-	file << "graph BinTree" << endl
-		 <<	"{" << endl
-		 << "	graph[ordering=\"out\"];" << endl << endl;
-		 
 	Node* p_node;
-	Stack<Node*> stack, stack_all;
+	Stack<Node*> stack;
 	Stack<int> stack_name;
+
 	stack.push(_root);
 	stack_all.push(_root);
 	int node_name = 0;
@@ -645,7 +635,7 @@ void BinTree<DataType>::write(const string& filename)const
 			node_name++;
 			if(p_node->lchild)
 			{
-				file << "\t" << current_name << "--" << node_name << ";" << endl;
+				file << "\t" << current_name << "->" << node_name << ";" << endl;
 			}
 			else
 			{
@@ -658,7 +648,7 @@ void BinTree<DataType>::write(const string& filename)const
 			node_name++;
 			if(p_node->rchild)
 			{
-				file << "\t" << current_name << "--" << node_name << ";" << endl;
+				file << "\t" << current_name << "->" << node_name << ";" << endl;
 			}
 			else
 			{
@@ -671,9 +661,15 @@ void BinTree<DataType>::write(const string& filename)const
 	}
 
 	file << endl;
+	return node_name;
+}
+
+template<class DataType>
+void BinTree<DataType>::write_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const
+{
 	while(!stack_all.empty())
 	{
-		p_node = stack_all.pop();
+		Node* p_node = stack_all.pop();
 		if(!p_node)
 		{
 			file << "	NULL" << node_name-- << "[shape=\"circle\",label=\"A\",style=\"invis\"];" << endl;
@@ -683,6 +679,68 @@ void BinTree<DataType>::write(const string& filename)const
 			file << "\t" << node_name-- << "[shape=\"circle\",label=\"" << p_node->data << "\"];" << endl;
 		}
 	}
+}
+
+template<class DataType>
+void BinTree<DataType>::write_content_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const
+{
+	while(!stack_all.empty())
+	{
+		Node* p_node = stack_all.pop();
+		if(!p_node)
+		{
+			file << "	NULL" << node_name-- << "[shape=\"circle\",label=\"A\",style=\"invis\"];" << endl;
+		}
+		else
+		{
+			file << "\t" << node_name-- << "[shape=\"circle\",label=\"" << *(p_node->data) << "\"];" << endl;
+		}
+	}
+}
+
+template<class DataType>
+void BinTree<DataType>::write(const string& filename)const
+{
+	if(empty())
+	{
+		cout << "The tree is empty, nothing to write!" << endl;
+		return;
+	}
+
+	ofstream file("Figures/bintree.dot");
+	file << "digraph BinTree" << endl
+		 <<	"{" << endl
+		 << "	digraph[ordering=\"out\"];" << endl << endl;
+		 
+	Stack<Node*> stack_all;
+
+	int node_name = write_part1(stack_all, file);
+	write_part2(stack_all, node_name, file);
+
+	file << "}" << endl;
+	file.close();
+	string cmd = "dot Figures/bintree.dot | gvpr -c -f Figures/binarytree.gvpr | neato -n -Tpdf -o Figures/" + filename;
+	system(cmd.data());
+}
+
+template<class DataType>
+void BinTree<DataType>::write_content(const string& filename)const
+{
+	if(empty())
+	{
+		cout << "The tree is empty, nothing to write!" << endl;
+		return;
+	}
+
+	ofstream file("Figures/bintree.dot");
+	file << "digraph BinTree" << endl
+		 <<	"{" << endl
+		 << "	digraph[ordering=\"out\"];" << endl << endl;
+		 
+	Stack<Node*> stack_all;
+
+	int node_name = write_part1(stack_all, file);
+	write_content_part2(stack_all, node_name, file);
 
 	file << "}" << endl;
 	file.close();
@@ -700,6 +758,20 @@ void BinTree<DataType>::show(const string& filename)const
 	}
 
 	write(filename);
+	string cmd = "start sumatrapdf Figures/" + filename;
+	system(cmd.data());
+}
+
+template<class DataType>
+void BinTree<DataType>::show_content(const string& filename)const
+{
+	if(empty())
+	{
+		cout << "The tree is empty, nothing to show!" << endl;
+		return;
+	}
+
+	write_content(filename);
 	string cmd = "start sumatrapdf Figures/" + filename;
 	system(cmd.data());
 }
@@ -776,7 +848,9 @@ void BinTree<DataType>::trav_method(TravType method)
 	{
 		case PRE: trav_pre(); break;
 		case POST: trav_post(); break;
-		case IN: trav_in(); break;
+		case IN1: trav_in1(); break;
+		case IN2:
+		case IN: trav_in2(); break;
 		case LEVEL: trav_level(); break;
 		default:
 		{
@@ -816,6 +890,7 @@ template<class DataType>
 void BinTree<DataType>::trav_pre()
 {
 	_begin = iterator(_root);
+	_root->prev = NULL;
 
 	Stack<Node*> stack;
 	stack.push(_root);
@@ -827,6 +902,7 @@ void BinTree<DataType>::trav_pre()
 		if(stack.empty())
 		{
 			_rear = iterator(node);
+			node->next = NULL;
 			return;
 		}
 		node->next = stack.top();
@@ -867,6 +943,7 @@ void BinTree<DataType>::trav_post()
 	gotoHLVFL(stack);
 	Node *last_node = stack.pop(), *node;
 	_begin = last_node;
+	last_node->prev = NULL;
 
 	while(!stack.empty())
 	{
@@ -880,6 +957,7 @@ void BinTree<DataType>::trav_post()
 		last_node = node;
 	}
 	_rear = iterator(node);
+	node->next = NULL;
 }
 
 template<class DataType>
@@ -898,11 +976,12 @@ typename BinTree<DataType>::Node* BinTree<DataType>::goto_most_left(Node* node, 
 }
 
 template<class DataType>
-void BinTree<DataType>::trav_in()
+void BinTree<DataType>::trav_in1()
 {
 	Stack<Node*> stack;
 	Node *last_node = goto_most_left(_root, stack), *node;
 	_begin = last_node;
+	last_node->prev = NULL;
 
 	while(!stack.empty())
 	{
@@ -916,6 +995,45 @@ void BinTree<DataType>::trav_in()
 		last_node = node;
 	}
 	_rear = iterator(node);
+	node->next = NULL;
+}
+
+template<class DataType>
+void BinTree<DataType>::trav_in2()
+{
+	Stack<Node*> stack;
+	Node* last_node = NULL;
+	Node* node = _root;
+	while(true)
+	{
+		if(node)
+		{
+			stack.push(node);
+			node = node->lchild;
+		}
+		else if(!stack.empty())
+		{
+			node = stack.pop();
+			if(last_node)
+			{
+				last_node->next = node;
+			}
+			else
+			{
+				_begin = iterator(node);
+				node->prev = NULL;
+			}
+			node->prev = last_node;
+			last_node = node;
+			node = node->rchild;
+		}
+		else
+		{
+			_rear = iterator(last_node);
+			last_node->next = NULL;
+			return;
+		}
+	}
 }
 
 template<class DataType>
@@ -925,6 +1043,7 @@ void BinTree<DataType>::trav_level()
 
 	Queue<Node*> queue;
 	queue.push(_root);
+	_root->prev = NULL;
 	while(true)
 	{
 		Node* node = queue.pop();
@@ -939,6 +1058,7 @@ void BinTree<DataType>::trav_level()
 		if(queue.empty())
 		{
 			_rear = iterator(node);
+			node->next = NULL;
 			return;
 		}
 		node->next = queue.front();

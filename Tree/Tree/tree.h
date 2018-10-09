@@ -19,7 +19,15 @@ class Forest;
 template<class DataType>
 class Tree
 {
+	template<class ElemType>
+	friend class BinTree;
+
+	template<class ElemType>
+	friend class Forest;
+
 public:
+	enum TravType {PRE, POST, LEVEL};
+
 	class Node
 	{
 	public:
@@ -53,6 +61,7 @@ private:
 public:
 	void write_part1(Stack<Node*>& stack_node2, Stack<int>& stack_number2, int n, ofstream& file)const;
 	void write_part2(Stack<Node*>& stack_node2, Stack<int>& stack_number2, ofstream& file)const;
+	void write_content_part2(Stack<Node*>& stack_node2, Stack<int>& stack_number2, ofstream& file)const;
 
 public:
 	Tree(){}
@@ -62,6 +71,8 @@ public:
 
 	Tree<DataType>& operator =(const Tree<DataType>& tree); // finished
 	Tree<DataType>& operator =(const BinTree<DataType>& tree); // finished
+
+	BinTree<DataType*>& toBinTree()const;
 
 	void clear();
 	int size()const{return _size;}
@@ -82,12 +93,20 @@ public:
 	Tree<DataType> subtree(Node* node);
 
 	void show(const string& filename = "Tree")const;
+	void show_content(const string& filename = "Tree")const;
 	void write(const string& filename)const;
+	void write_content(const string& filename)const;
 };
 
 template<class DataType>
 class Forest: public List< Tree<DataType> >
 {
+	template<class ElemType>
+	friend class Tree;
+
+	template<class ElemType>
+	friend class BinTree;
+	
 public:
 	Forest() : List< Tree<DataType> >() {}
 	Forest(const Forest<DataType>& forest) : List< Tree<DataType> >(forest) {}
@@ -96,10 +115,13 @@ public:
 	Forest(BinTree<DataType> bintree); // finished
 
 	Forest<DataType>& operator =(const BinTree<DataType>& bintree);
+	BinTree<DataType*>& toBinTree()const;
 
 	void show(const string& filename = "Forest")const;
+	void show_content(const string& filename = "Forest")const;
 	void write(const string& filename)const;
+	void write_content(const string& filename)const;
 };
 
-#include "tree.cpp"
+#include <tree.cpp>
 #endif

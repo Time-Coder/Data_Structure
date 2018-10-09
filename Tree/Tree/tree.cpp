@@ -197,6 +197,110 @@ Forest<DataType>::Forest(BinTree<DataType> bintree)
 }
 
 template<class DataType>
+void ptr_check(DataType*& ptr)
+{
+	if(!ptr)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+}
+
+template<class DataType>
+BinTree<DataType*>& Tree<DataType>::toBinTree()const
+{
+	BinTree<DataType*>* ptr_bintree = new BinTree<DataType*>;
+	if(empty())
+	{
+		return *ptr_bintree;
+	}
+
+	ptr_bintree->_root = new typename BinTree<DataType*>::Node(&(_root->data));
+	ptr_check(ptr_bintree->_root);
+
+	Stack<Node*> src_stack;
+	Stack<typename BinTree<DataType*>::Node*> dest_stack;
+
+	src_stack.push(_root);
+	dest_stack.push(ptr_bintree->_root);
+
+	while(!src_stack.empty())
+	{
+		Node* src_node = src_stack.pop();
+		auto dest_node = dest_stack.pop();
+
+		if(src_node->children.empty())
+		{
+			continue;
+		}
+
+		auto it = src_node->children.begin();
+		dest_node->lchild = new typename BinTree<DataType*>::Node(&(_root->data), dest_node);
+		ptr_check(dest_node->lchild);
+		
+		dest_node = dest_node->lchild;
+
+		dest_stack.push(dest_node);
+		src_stack.push(*it);
+
+		it++;
+		for(; it != src_node->children.end(); it++)
+		{
+			dest_node->rchild = new typename BinTree<DataType*>::Node(&((*it)->data), dest_node);
+			ptr_check(dest_node->rchild);
+
+			dest_node = dest_node->rchild;
+			dest_stack.push(dest_node);
+			src_stack.push(*it);
+		}
+	}
+	ptr_bintree->_size = _size;
+
+	return *ptr_bintree;
+}
+
+template<class DataType>
+BinTree<DataType*>& Forest<DataType>::toBinTree()const
+{
+	BinTree<DataType*>* ptr_main_bintree;
+	if(this->empty())
+	{
+		ptr_main_bintree = new BinTree<DataType*>;
+		ptr_check(ptr_main_bintree);
+		return *ptr_main_bintree;
+	}
+
+	auto it = this->begin();
+	BinTree<DataType*>* ptr_bintree = new BinTree<DataType*>(it->toBinTree());
+	if(!ptr_bintree)
+	{
+		cerr << "Failed to allocate memory!" << endl;
+		exit(-1);
+	}
+
+	ptr_main_bintree = ptr_bintree;
+	typename BinTree<DataType*>::Node* node = ptr_main_bintree->root();
+
+	it++;
+	for(; it != this->end(); it++)
+	{
+		ptr_bintree = new BinTree<DataType*>(it->toBinTree());
+		if(!ptr_bintree)
+		{
+			cerr << "Failed to allocate memory!" << endl;
+			exit(-1);
+		}
+
+		node->rchild = ptr_bintree->_root;
+		ptr_bintree->_root->parent = node;
+		node = node->rchild;
+		ptr_main_bintree->_size += ptr_bintree->_size;
+	}
+
+	return *ptr_main_bintree;
+}
+
+template<class DataType>
 Tree<DataType>::~Tree()
 {
 	clear();
@@ -464,6 +568,18 @@ void Tree<DataType>::show(const string& filename)const
 }
 
 template<class DataType>
+void Tree<DataType>::show_content(const string& filename)const
+{
+	if(!_root)
+	{
+		cout << "The tree is empty, nothing to show!" << endl;
+	}
+
+	write_content(filename);
+	system(("dot -Tpdf Figures/" + filename + ".dot -o Figures/" + filename + " && start sumatrapdf Figures/" + filename).data());
+}
+
+template<class DataType>
 void Tree<DataType>::write_part1(Stack<Node*>& stack_node2,
 								 Stack<int>& stack_number2,
 								 int n,
@@ -487,7 +603,7 @@ void Tree<DataType>::write_part1(Stack<Node*>& stack_node2,
 
 		for(typename List<Node*>::iterator it = node->children.begin(); it != node->children.end(); it++, j++)
 		{
-			file << "\t" << i << "--" << j << ";" << endl;
+			file << "\t" << i << "->" << j << ";" << endl;
 			stack_node.push(*it);
 			stack_number.push(j);
 		}
@@ -509,7 +625,37 @@ void Tree<DataType>::write_part2(Stack<Node*>& stack_node2,
 }
 
 template<class DataType>
+void Tree<DataType>::write_content_part2(Stack<Node*>& stack_node2,
+								 		 Stack<int>& stack_number2,
+								 		 ofstream& file)const
+{
+	while(!stack_node2.empty())
+	{
+		auto node = stack_node2.pop();
+		int i = stack_number2.pop();
+		file << "\t" << i << "[shape=\"circle\",label=\""<< *(node->data) <<"\"];" << endl;
+	}
+}
+
+template<class DataType>
 void Tree<DataType>::write(const string& filename)const
+{
+	ofstream file("Figures/" + filename + ".dot");
+	file << "digraph" << endl
+		 << "{" << endl;
+
+	Stack<Node*> stack_node2;
+	Stack<int> stack_number2;
+	
+	this->write_part1(stack_node2, stack_number2, 0, file);
+	this->write_part2(stack_node2, stack_number2, file);
+
+	file << "}";
+	file.close();
+}
+
+template<class DataType>
+void Tree<DataType>::write_content(const string& filename)const
 {
 	ofstream file("Figures/" + filename + ".dot");
 	file << "graph" << endl
@@ -519,7 +665,7 @@ void Tree<DataType>::write(const string& filename)const
 	Stack<int> stack_number2;
 	
 	this->write_part1(stack_node2, stack_number2, 0, file);
-	this->write_part2(stack_node2, stack_number2, file);
+	this->write_content_part2(stack_node2, stack_number2, file);
 
 	file << "}";
 	file.close();
@@ -557,6 +703,18 @@ void Forest<DataType>::show(const string& filename)const
 }
 
 template<class DataType>
+void Forest<DataType>::show_content(const string& filename)const
+{
+	if(this->empty())
+	{
+		cout << "The forest is empty, nothing to show!" << endl;
+	}
+
+	write_content(filename);
+	system(("dot -Tpdf Figures/" + filename + ".dot -o Figures/" + filename + " && start sumatrapdf Figures/" + filename).data());
+}
+
+template<class DataType>
 void Forest<DataType>::write(const string& filename)const
 {
 	if(this->empty())
@@ -565,7 +723,7 @@ void Forest<DataType>::write(const string& filename)const
 	}
 
 	ofstream file("Figures/" + filename + ".dot");
-	file << "graph" << endl
+	file << "digraph" << endl
 		 << "{" << endl;
 
 	Stack<typename Tree<DataType>::Node*> stack_node2;
@@ -589,6 +747,45 @@ void Forest<DataType>::write(const string& filename)const
 			continue;
 		}
 		it->write_part2(stack_node2, stack_number2, file);
+	}
+
+	file << "}";
+	file.close();
+}
+
+template<class DataType>
+void Forest<DataType>::write_content(const string& filename)const
+{
+	if(this->empty())
+	{
+		cout << "The forest is empty, nothing to write!" << endl;
+	}
+
+	ofstream file("Figures/" + filename + ".dot");
+	file << "digraph" << endl
+		 << "{" << endl;
+
+	Stack<typename Tree<DataType>::Node*> stack_node2;
+	Stack<int> stack_number2;
+	
+	int i = 1;
+	for(auto it = this->begin(); it != this->end(); it++)
+	{
+		if(it->empty())
+		{
+			continue;
+		}
+		it->write_part1(stack_node2, stack_number2, i, file);
+		i += it->size();
+	}
+	
+	for(auto it = this->begin(); it != this->end(); it++)
+	{
+		if(it->empty())
+		{
+			continue;
+		}
+		it->write_content_part2(stack_node2, stack_number2, file);
 	}
 
 	file << "}";

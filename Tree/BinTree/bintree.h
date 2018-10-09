@@ -19,8 +19,14 @@ class Forest;
 template<class DataType>
 class BinTree
 {
+	template<class ElemType>
+	friend class Tree;
+
+	template<class ElemType>
+	friend class Forest;
+
 public:
-	enum TravType {NONE, PRE, POST, IN, LEVEL};
+	enum TravType {NONE, PRE, POST, IN1, IN2, IN, LEVEL};
 	class Node
 	{
 	public:
@@ -69,7 +75,8 @@ public:
 		bool operator !=(Node* ptr){return _ptr != ptr;}
 		bool operator !=(const iterator& it){return it._ptr != _ptr;}
 		Node* ptr()const{return _ptr;}
-		DataType& operator *(){return _ptr->data;}
+		DataType& operator  *(){return _ptr->data;}
+		DataType* operator ->(){return &(_ptr->data);}
 	};
 
 private:
@@ -87,6 +94,10 @@ private:
 						  Node* rchild = NULL); // finished
 	void copy(BinTree<DataType>& dest_tree, const BinTree<DataType>& src_tree); // finished
 
+	int write_part1(Stack<Node*>& stack_all, ofstream& file)const;
+	void write_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const;
+	void write_content_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const;
+
 	static Node* trav_left_branch(Node* node, Stack<Node*>& stack);
 	void trav_pre();
 
@@ -94,7 +105,8 @@ private:
 	void trav_post();
 
 	static Node* goto_most_left(Node* node, Stack<Node*>& stack);
-	void trav_in();
+	void trav_in1();
+	void trav_in2();
 
 	void trav_level();
 
@@ -125,8 +137,11 @@ public:
 	int remove(Node* node);
 	BinTree<DataType>& secede(Node* node);
 	static BinTree<DataType>& subtree(Node* node);
+
 	void show(const string& filename = "BinTree")const;
+	void show_content(const string& filename = "BinTree")const;
 	void write(const string& filename)const;
+	void write_content(const string& filename)const;
 
 	void trav_method(TravType method);
 	iterator begin()const;
