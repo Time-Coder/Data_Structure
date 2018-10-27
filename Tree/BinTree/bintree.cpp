@@ -639,7 +639,7 @@ int BinTree<DataType>::write_part1(Stack<Node*>& stack_all, ofstream& file)const
 			}
 			else
 			{
-				file << "\t" << current_name << "--NULL" << node_name << "[style=\"invis\"];" << endl;
+				file << "\t" << current_name << "->NULL" << node_name << "[style=\"invis\"];" << endl;
 			}
 			stack.push(p_node->lchild);
 			stack_all.push(p_node->lchild);
@@ -652,7 +652,7 @@ int BinTree<DataType>::write_part1(Stack<Node*>& stack_all, ofstream& file)const
 			}
 			else
 			{
-				file << "\t" << current_name << "--NULL" << node_name << "[style=\"invis\"];" << endl;
+				file << "\t" << current_name << "->NULL" << node_name << "[style=\"invis\"];" << endl;
 			}
 			stack.push(p_node->rchild);
 			stack_all.push(p_node->rchild);
@@ -709,8 +709,7 @@ void BinTree<DataType>::write(const string& filename)const
 
 	ofstream file("Figures/bintree.dot");
 	file << "digraph BinTree" << endl
-		 <<	"{" << endl
-		 << "	digraph[ordering=\"out\"];" << endl << endl;
+		 <<	"{" << endl;
 		 
 	Stack<Node*> stack_all;
 
@@ -734,8 +733,7 @@ void BinTree<DataType>::write_content(const string& filename)const
 
 	ofstream file("Figures/bintree.dot");
 	file << "digraph BinTree" << endl
-		 <<	"{" << endl
-		 << "	digraph[ordering=\"out\"];" << endl << endl;
+		 <<	"{" << endl;
 		 
 	Stack<Node*> stack_all;
 

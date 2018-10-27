@@ -21,7 +21,6 @@ private:
 	void copy_from(const DataType* array, int lower, int upper);
 	void expand();
 	void shrink();
-	void check_limit(int lower, int upper, const char* function_name)const;
 	void merge(int lower, int middle, int upper);
 
 public:
@@ -35,6 +34,7 @@ public:
 	Vector(initializer_list<DataType> list);
 	~Vector();
 
+	void check_limit(int lower, int upper, const char* function_name)const;
 	void clear();
 	int size()const;
 	int capacity()const;
@@ -66,6 +66,9 @@ public:
 	template<class ElemType>
 	friend ostream& operator <<(ostream& out, const Vector<ElemType>& v);
 };
+
+Vector<int> int_rand(int lower, int upper, int n);
+Vector<double> rand(double lower, double upper, int n);
 
 #include <vector.cpp>
 #endif

@@ -80,7 +80,7 @@ int main()
 	BinTree<char> bintree = forest;
 	bintree.show();
 	BinTree<char*> bintree_ptr = forest.toBinTree();
-	bintree_ptr.show("Ptr");
+	bintree_ptr.show_content("Ptr");
 
 	return 0;
 }

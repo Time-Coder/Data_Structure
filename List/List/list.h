@@ -61,11 +61,11 @@ protected:
 	int length = 0;
 
 public:
-	List<DataType>();
-	List<DataType>(int n);
-	List<DataType>(int n, DataType element);
-	List<DataType>(const List<DataType>& list);
-	~List<DataType>();
+	List();
+	List(int n);
+	List(int n, DataType element);
+	List(const List<DataType>& list);
+	~List();
 	List<DataType>& operator =(const List<DataType>& list);
 	void clear();
 	int size()const;

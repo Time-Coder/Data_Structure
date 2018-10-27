@@ -179,9 +179,8 @@ void Vector<DataType>::shrink()
 		return;
 	}
 	
-	_capacity >> 1;
 	DataType *old_data = _data;
-	_data = new_DataType(_capacity);
+	_data = new_DataType(_capacity >>= 1);
 
 	DataType *ptr_dest = _data;
 	DataType *ptr_src = old_data;
@@ -281,7 +280,7 @@ void Vector<DataType>::erase(int lower, int upper)
 		*ptr_dest++ = *ptr_src++;
 	}
 
-	_size -= upper - lower;
+	_size -= (upper - lower);
 	shrink();
 }
 
@@ -456,17 +455,45 @@ int Vector<DataType>::uniquify()
 template<class DataType>
 ostream& operator <<(ostream& out, const Vector<DataType>& v)
 {
+	if(v.empty())
+	{
+		return out;
+	}
+
 	int i;
 	for(i = 0; i < v.size()-1; i++)
 	{
 		out << v[i] << ", ";
 	}
-	if(i)
-	{
-		out << v[i];
-	}
+	out << v[i];
 
 	return out;
+}
+
+Vector<int> int_rand(int lower, int upper, int n)
+{
+	srand((unsigned)time(NULL));
+	Vector<int> v(n);
+
+	for(int i = 0; i < n; i++)
+	{
+		v[i] = lower + rand() % (upper - lower + 1);
+	}
+
+	return v;
+}
+
+Vector<double> rand(double lower, double upper, int n)
+{
+	srand((unsigned)time(NULL));
+	Vector<double> v(n);
+
+	for(int i = 0; i < n; i++)
+	{
+		v[i] = lower + (upper - lower) * rand() / RAND_MAX;
+	}
+
+	return v;
 }
 
 #endif

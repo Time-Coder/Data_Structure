@@ -326,7 +326,7 @@ int* calculate_next(const String& pattern)
 	for(int j = 1; j < pattern.size(); j++)
 	{
 		int k = next[j-1];
-		while(k != -1 && pattern[j-1] != pattern[k])
+		while(k != -1 && pattern[j] != pattern[k])
 		{
 			k = next[k];
 		}
