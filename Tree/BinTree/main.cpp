@@ -2,33 +2,37 @@
 
 int main()
 {
+	// 二叉树的遍历测试
 	// BinTree<char> bintree;
-	// bintree.insert_root('i');
-	// BinTree<char>::Node* node = bintree.insert_lchild(bintree.root(), 'd');
-	// node = bintree.insert_lchild(node, 'c');
-	// node = bintree.insert_lchild(node, 'a');
-	// node = bintree.insert_rchild(node, 'b');
-	// node = bintree.root()->lchild;
-	// node = bintree.insert_rchild(node, 'h');
-	// node = bintree.insert_lchild(node, 'f');
-	// node = bintree.insert_lchild(node, 'e');
-	// bintree.insert_rchild(node->parent, 'g');
-	// node = bintree.insert_rchild(bintree.root(), 'l');
-	// node = bintree.insert_lchild(node, 'k');
-	// node = bintree.insert_lchild(node, 'j');
-	// node = bintree.root()->rchild;
-	// node = bintree.insert_rchild(node, 'n');
-	// node = bintree.insert_lchild(node, 'm');
-	// node = node->parent;
-	// node = bintree.insert_rchild(node, 'p');
-	// node = bintree.insert_lchild(node, 'o');
-	
+	// auto node_i = bintree.insert_root('i');
+	// auto node_d = bintree.insert_lchild(node_i, 'd');
+	// auto node_c = bintree.insert_lchild(node_d, 'c');
+	// auto node_a = bintree.insert_lchild(node_c, 'a');
+	// bintree.insert_rchild(node_a, 'b');
+	// auto node_h = bintree.insert_rchild(node_d, 'h');
+	// auto node_f = bintree.insert_lchild(node_h, 'f');
+	// bintree.insert_lchild(node_f, 'e');
+	// bintree.insert_rchild(node_f, 'g');
+	// auto node_l = bintree.insert_rchild(node_i, 'l');
+	// auto node_k = bintree.insert_lchild(node_l, 'k');
+	// bintree.insert_lchild(node_k, 'j');
+	// auto node_n = bintree.insert_rchild(node_l, 'n');
+	// bintree.insert_lchild(node_n, 'm');
+	// auto node_p = bintree.insert_rchild(node_n, 'p');
+	// bintree.insert_lchild(node_p, 'o');
+	// bintree.show();
+
 	// bintree.trav_method(BinTree<char>::IN2);
 	// for(auto it = bintree.begin(); it != bintree.end(); it++)
 	// {
 	// 	cout << *it << ", ";
 	// }
-	// cout << endl;
+	// cout << endl << node_h->height << endl;
+	// auto subtree = bintree.secede(node_l);
+	// cout << node_i->height << endl;
+	// subtree.show("subtree");
+	// cout << subtree.root()->height << endl;
+
 	// bintree.remove(bintree.root()->rchild);
 	// bintree.show();
 	// Tree<char> tree = bintree;
@@ -56,6 +60,7 @@ int main()
 	// BinTree<int> binbintree = bintree;
 	// binbintree.show();
 
+	// 森林转二叉树测试
 	Tree<char> tree1;
 	auto node = tree1.insert_root('A');
 	tree1.append_child(node, 'B');
@@ -77,10 +82,13 @@ int main()
 	forest.push_back(tree2);
 	forest.push_back(tree3);
 
-	BinTree<char> bintree = forest;
-	bintree.show();
-	BinTree<char*> bintree_ptr = forest.toBinTree();
+	BinTree<char> bintree;
+	bintree = forest;
+	bintree.show("T1");
+	BinTree<char*> bintree_ptr = &forest;
+	bintree.show("T2");
+	forest.show("T3");
 	bintree_ptr.show_content("Ptr");
-
+	
 	return 0;
 }

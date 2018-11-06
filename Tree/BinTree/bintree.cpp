@@ -1,180 +1,211 @@
 #ifdef BINTREE_H
 
 template<class DataType>
-typename BinTree<DataType>::Node* BinTree<DataType>::new_Node(const DataType& value,
-													 Node* parent,
-													 Node* lchild,
-													 Node* rchild)
+template<class ElemType>
+void BinTree<DataType>::check_ptr(const ElemType* ptr)
 {
-	BinTree<DataType>::Node* p_node = new BinTree<DataType>::Node(value, parent, lchild, rchild);
-	if(!p_node)
+	if(!ptr)
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
-
-	return p_node;
 }
 
 template<class DataType>
-int BinTree<DataType>::Node::size()const
+void BinTree<DataType>::check_node(const Node* node, const char* function_name)
 {
-	if(isleaf())
+	if(!has_node(node))
+	{
+		cout << "Error in '" << function_name << "'" << endl
+			 << "The node is not in current tree." << endl;
+		exit(-2);
+	}
+}
+
+template<class DataType>
+typename BinTree<DataType>::Node*
+BinTree<DataType>::new_Node(const DataType& value,
+							int height,
+							Node* parent,
+							Node* lchild,
+							Node* rchild)
+{
+	BinTree<DataType>::Node* node = new BinTree<DataType>::Node(value, height, parent, lchild, rchild);
+	check_ptr(node);
+
+	return node;
+}
+
+template<class DataType>
+int BinTree<DataType>::size(const Node* node)
+{
+	if(!node)
+	{
+		return 0;
+	}
+
+	if(isleaf(node))
 	{
 		return 1;
 	}
 
-	int n = 1;
-	if(lchild)
+	return 1 + size(node->lchild) + size(node->rchild);
+}
+
+template<class DataType>
+int BinTree<DataType>::height(const Node* node)
+{
+	if(!node)
 	{
-		n += lchild->size();
+		return -1;
 	}
-	if(rchild)
+
+	return node->height;
+}
+
+template<class DataType>
+void BinTree<DataType>::update_height(Node* node)
+{
+	if(!node)
 	{
-		n += rchild->size();
+		return;
+	}
+
+	node->height = 1 + max(height(node->lchild), height(node->rchild));
+}
+
+template<class DataType>
+void BinTree<DataType>::update_height_above(Node* node)
+{
+	while(node)
+	{
+		update_height(node);
+		node = node->parent;
+	}
+}
+
+template<class DataType>
+void BinTree<DataType>::update_height_below(Node* node)
+{
+	if(!node)
+	{
+		return;
+	}
+
+	update_height_below(node->lchild);
+	update_height_below(node->rchild);
+	node->height = 1 + max(height(node->lchild), height(node->rchild));
+}
+
+template<class DataType>
+int BinTree<DataType>::depth(const Node* node)
+{
+	int n = -1;
+	while(node)
+	{
+		n++;
+		node = node->parent;
 	}
 
 	return n;
 }
 
 template<class DataType>
-int BinTree<DataType>::Node::height()const
+bool BinTree<DataType>::isleaf(const Node* node)
 {
-	if(isleaf())
+	return node && !(node->lchild || node->rchild);
+}
+
+template<class DataType>
+bool BinTree<DataType>::isroot(const Node* node)
+{
+	return node && !(node->parent);
+}
+
+template<class DataType>
+bool BinTree<DataType>::islchild(const Node* node)
+{
+	return node && node->parent && node->parent->lchild == node;
+}
+
+template<class DataType>
+bool BinTree<DataType>::isrchild(const Node* node)
+{
+	return node && node->parent && node->parent->rchild == node;
+}
+
+template<class DataType>
+typename BinTree<DataType>::Node*& BinTree<DataType>::branch(Node*& node)
+{
+	if(!node)
 	{
-		return 0;
+		return node;
+	}
+	if(!(node->parent))
+	{
+		return _root;
+	}
+	
+	return (node->parent->lchild == node) ? node->parent->lchild : node->parent->rchild;
+}
+
+template<class DataType>
+typename BinTree<DataType>::Node*& BinTree<DataType>::brother(Node*& node)
+{
+	if(!node)
+	{
+		return node;
+	}
+	if(!(node->parent))
+	{
+		return node->parent;
 	}
 
-	int lheight = -1, rheight = -1;
-	if(lchild)
-	{
-		lheight = lchild->height();
-	}
-	if(rchild)
-	{
-		rheight = rchild->height();
-	}
-
-	return max(lheight, rheight) + 1;
+	return (node->parent->rchild == node) ? node->parent->lchild : node->parent->rchild;
 }
 
 template<class DataType>
-int BinTree<DataType>::Node::level()const
+void BinTree<DataType>::copy_from(const BinTree<DataType>& bintree)
 {
-	if(!parent)
-	{
-		return 0;
-	}
-
-	return parent->level() + 1;
-}
-
-template<class DataType>
-typename BinTree<DataType>::Node* BinTree<DataType>::Node::insert_lchild(const DataType& value)
-{
-	if(lchild)
-	{
-		cout << "Error in 'typename BinTree<DataType>::Node* BinTree<DataType>::Node::insert_lchild(const DataType& value)'" << endl
-			 << "Current node already has left child!" << endl;
-		exit(-1);
-	}
-	lchild = new_Node(value, this);
-
-	return lchild;
-}
-
-template<class DataType>
-typename BinTree<DataType>::Node* BinTree<DataType>::Node::insert_rchild(const DataType& value)
-{
-	if(rchild)
-	{
-		cout << "Error in 'typename BinTree<DataType>::Node* BinTree<DataType>::Node::insert_rchild(const DataType& value)'" << endl
-			 << "Current node already has right child!" << endl;
-		exit(-1);
-	}
-	rchild = new_Node(value, this);
-
-	return rchild;
-}
-
-template<class DataType>
-bool BinTree<DataType>::Node::isleaf()const
-{
-	return !(lchild || rchild);
-}
-
-template<class DataType>
-bool BinTree<DataType>::Node::isroot()const
-{
-	return !parent;
-}
-
-template<class DataType>
-bool BinTree<DataType>::Node::islchild()const
-{
-	return (parent && parent->lchild == this);
-}
-
-template<class DataType>
-bool BinTree<DataType>::Node::isrchild()const
-{
-	return (parent && parent->rchild == this);
-}
-
-template<class DataType>
-typename BinTree<DataType>::Node* BinTree<DataType>::Node::brother()const
-{
-	if(!parent)
-	{
-		return NULL;
-	}
-
-	return (parent->rchild == this ? parent->lchild : parent->rchild);
-}
-
-template<class DataType>
-bool BinTree<DataType>::Node::belong_to(const BinTree<DataType>& tree)const
-{
-	return tree.has_node(this);
-}
-
-template<class DataType>
-void BinTree<DataType>::copy(BinTree<DataType>& dest_tree, const BinTree<DataType>& src_tree)
-{
-	dest_tree.clear();
-	dest_tree._size = src_tree._size;
+	_size = bintree._size;
 
 	Node* src_node;
-	Node* dest_node = dest_tree._root;
-	dest_tree._root = new_Node(src_tree._root->data);
+	Node* dest_node = _root;
+	_root = new_Node(bintree._root->data, bintree._root->height);
 
-	Stack<Node*> src_stack, dest_stack;
-	src_stack.push(src_tree._root);
-	dest_stack.push(dest_tree._root);
+	Queue<Node*> src_queue, dest_queue;
+	src_queue.push(bintree._root);
+	dest_queue.push(_root);
 
-	while(!src_stack.empty())
+	while(!src_queue.empty())
 	{
-		src_node = src_stack.pop();
-		dest_node = dest_stack.pop();
+		src_node = src_queue.pop();
+		dest_node = dest_queue.pop();
 		if(src_node->rchild)
 		{
-			dest_node->rchild = new_Node(src_node->rchild->data, dest_node);
-			src_stack.push(src_node->rchild);
-			dest_stack.push(dest_node->rchild);
+			dest_node->rchild = new_Node(src_node->rchild->data, src_node->rchild->height, dest_node);
+			src_queue.push(src_node->rchild);
+			dest_queue.push(dest_node->rchild);
 		}
 		if(src_node->lchild)
 		{
-			dest_node->lchild = new_Node(src_node->lchild->data, dest_node);
-			src_stack.push(src_node->lchild);
-			dest_stack.push(dest_node->lchild);
+			dest_node->lchild = new_Node(src_node->lchild->data, src_node->lchild->height, dest_node);
+			src_queue.push(src_node->lchild);
+			dest_queue.push(dest_node->lchild);
 		}
 	}
 }
 
 template<class DataType>
-BinTree<DataType>::BinTree(const BinTree<DataType>& tree)
+BinTree<DataType>::BinTree(const BinTree<DataType>& bintree)
 {
-	copy(*this, tree);
+	copy_from(bintree);
+}
+
+template<class DataType>
+BinTree<DataType>::BinTree(BinTree<DataType>&& bintree)
+{
+	*this = move(bintree);
 }
 
 template<class DataType>
@@ -199,7 +230,7 @@ BinTree<DataType>::BinTree(const Tree<DataType>& tree)
 		}
 
 		auto it = src_node->children.begin();
-		dest_node->lchild = new_Node((*it)->data, dest_node);
+		dest_node->lchild = new_Node((*it)->data, 0, dest_node);
 		dest_node = dest_node->lchild;
 
 		dest_stack.push(dest_node);
@@ -208,13 +239,69 @@ BinTree<DataType>::BinTree(const Tree<DataType>& tree)
 		it++;
 		for(; it != src_node->children.end(); it++)
 		{
-			dest_node->rchild = new_Node((*it)->data, dest_node);
+			dest_node->rchild = new_Node((*it)->data, 0, dest_node);
 			dest_node = dest_node->rchild;
 			dest_stack.push(dest_node);
 			src_stack.push(*it);
 		}
 	}
 	_size = tree.size();
+
+	update_height_below(_root);
+}
+
+template<class DataType>
+template<class ElemType>
+BinTree<DataType>::BinTree(const Tree<ElemType>* tree)
+{
+	if(!type_equal(DataType, ElemType*))
+	{
+		cout << "Error in 'BinTree<DataType>::BinTree(const Tree<ElemType>* tree)'" << endl
+			 << "DataType must equal to ElemType*" << endl;
+		exit(-1);
+	}
+
+	if(tree->empty())
+	{
+		return;
+	}
+
+	_root = new_Node(&(tree->_root->data));
+
+	Queue<typename Tree<ElemType>::Node*> src_queue;
+	Queue<Node*> dest_queue;
+
+	src_queue.push(tree->_root);
+	dest_queue.push(_root);
+
+	while(!src_queue.empty())
+	{
+		auto src_node = src_queue.pop();
+		Node* dest_node = dest_queue.pop();
+
+		if(src_node->children.empty())
+		{
+			continue;
+		}
+
+		auto it = src_node->children.begin();
+		dest_node->lchild = new_Node(&((*it)->data), 0, dest_node);
+		dest_node = dest_node->lchild;
+
+		dest_queue.push(dest_node);
+		src_queue.push(*it);
+
+		it++;
+		for(; it != src_node->children.end(); it++)
+		{
+			dest_node->rchild = new_Node(&((*it)->data), 0, dest_node);
+			dest_node = dest_node->rchild;
+			dest_queue.push(dest_node);
+			src_queue.push(*it);
+		}
+	}
+	_size = tree->_size;
+	update_height_below(_root);
 }
 
 template<class DataType>
@@ -226,38 +313,81 @@ BinTree<DataType>::BinTree(const Forest<DataType>& forest)
 	}
 
 	auto it = forest.begin();
-	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(*it);
-	if(!ptr_bintree)
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-	_root = ptr_bintree->_root;
-	BinTree<DataType>::Node* node = _root;
-	_size += ptr_bintree->_size;
-	it++;
+	*this = *it;
+	Node* node = _root;
 
+	it++;
 	for(; it != forest.end(); it++)
 	{
-		ptr_bintree = new BinTree<DataType>(*it);
-		if(!ptr_bintree)
-		{
-			cerr << "Failed to allocate memory!" << endl;
-			exit(-1);
-		}
+		BinTree<DataType>* ptr_bintree = new BinTree<DataType>(*it);
+		check_ptr(ptr_bintree);
 
 		node->rchild = ptr_bintree->_root;
 		ptr_bintree->_root->parent = node;
 		node = node->rchild;
 		_size += ptr_bintree->_size;
 	}
+	update_height_below(_root);
 }
 
 template<class DataType>
-BinTree<DataType>& BinTree<DataType>::operator =(const BinTree<DataType>& tree)
+template<class ElemType>
+BinTree<DataType>::BinTree(const Forest<ElemType>* forest)
 {
-	copy(*this, tree);
+	if(!type_equal(DataType, ElemType*))
+	{
+		cout << "Error in 'BinTree<DataType>::BinTree(const Forest<ElemType>* forest)'" << endl
+			 << "DataType must equal to ElemType*" << endl;
+		exit(-1);
+	}
 
+	if(forest->empty())
+	{
+		return;
+	}
+
+	auto it = forest->begin();
+	*this = it.ptr();
+	Node* node = _root;
+
+	it++;
+	for(; it != forest->end(); it++)
+	{
+		BinTree<DataType>* ptr_bintree = new BinTree<DataType>(it.ptr());
+		check_ptr(ptr_bintree);
+
+		node->rchild = ptr_bintree->_root;
+		ptr_bintree->_root->parent = node;
+		node = node->rchild;
+		_size += ptr_bintree->_size;
+	}
+	update_height_below(_root);
+}
+
+template<class DataType>
+BinTree<DataType>& BinTree<DataType>::operator =(const BinTree<DataType>& bintree)
+{
+	if(this != &bintree)
+	{
+		clear();
+		copy_from(bintree);
+	}
+
+	return *this;
+}
+
+template<class DataType>
+BinTree<DataType>& BinTree<DataType>::operator =(BinTree<DataType>&& bintree)
+{
+	if(this != &bintree)
+	{
+		clear();
+		_root = move(bintree._root);
+		_size = move(bintree._size);
+		bintree._root = NULL;
+		bintree._size = 0;
+	}
+	
 	return *this;
 }
 
@@ -265,34 +395,34 @@ template<class DataType>
 BinTree<DataType>& BinTree<DataType>::operator =(const Tree<DataType>& tree)
 {
 	clear();
-	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(tree);
-	if(!ptr_bintree)
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
+	BinTree<DataType> bintree = tree;
+	return *this = move(bintree);
+}
 
-	_root = ptr_bintree->_root;
-	_size = ptr_bintree->_size;
-
-	return *this;
+template<class DataType>
+template<class ElemType>
+BinTree<DataType>& BinTree<DataType>::operator =(const Tree<ElemType>* tree)
+{
+	clear();
+	BinTree<DataType> bintree = tree;
+	return *this = move(bintree);
 }
 
 template<class DataType>
 BinTree<DataType>& BinTree<DataType>::operator =(const Forest<DataType>& forest)
 {
 	clear();
-	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(forest);
-	if(!ptr_bintree)
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
+	BinTree<DataType> bintree = forest;
+	return *this = move(bintree);
+}
 
-	_root = ptr_bintree->_root;
-	_size = ptr_bintree->_size;
-
-	return *this;
+template<class DataType>
+template<class ElemType>
+BinTree<DataType>& BinTree<DataType>::operator =(const Forest<ElemType>* forest)
+{
+	clear();
+	BinTree<DataType> bintree = forest;
+	return *this = move(bintree);
 }
 
 template<class DataType>
@@ -331,6 +461,7 @@ void BinTree<DataType>::clear()
 	_rear = iterator(NULL);
 }
 
+// 删除以节点 node 为根的子树
 template<class DataType>
 int BinTree<DataType>::remove(Node* node)
 {
@@ -342,129 +473,123 @@ int BinTree<DataType>::remove(Node* node)
 	}
 	_begin = iterator(NULL);
 	_rear = iterator(NULL);
-	if(node->isroot())
+
+	Node* node_parent = node->parent;
+	if(!node_parent)
 	{
 		_root = NULL;
 	}
 	else
 	{
-		if(node->islchild())
+		if(islchild(node))
 		{
-			node->parent->lchild = NULL;
+			node_parent->lchild = NULL;
 		}
-		else if(node->isrchild())
+		else if(isrchild(node))
 		{
-			node->parent->rchild = NULL;
+			node_parent->rchild = NULL;
 		}
 	}
 
-	Stack<Node*> stack;
-	stack.push(node);
+	Queue<Node*> queue;
+	queue.push(node);
 	int n = 0;
-	while(!stack.empty())
+	while(!queue.empty())
 	{
-		node = stack.pop();
+		node = queue.pop();
 		if(node->rchild)
 		{
-			stack.push(node->rchild);
+			queue.push(node->rchild);
 		}
 		if(node->lchild)
 		{
-			stack.push(node->lchild);
+			queue.push(node->lchild);
 		}
 		delete node;
 		n++;
 	}
 	_size -= n;
+	update_height_above(node_parent);
 
 	return n;
 }
 
+// 取下以节点 node 为根的子树并返回它
 template<class DataType>
-BinTree<DataType>& BinTree<DataType>::secede(Node* p_node)
+BinTree<DataType> BinTree<DataType>::secede(Node* node)
 {
-	if(!has_node(p_node))
+	if(!has_node(node))
 	{
-		cout << "Error in 'BinTree<DataType>& BinTree<DataType>::secede(Node* p_node)'" << endl
+		cout << "Error in 'BinTree<DataType>& BinTree<DataType>::secede(Node* node)'" << endl
 			 << "Current node is not in this tree!" << endl;
 		exit(-1);
 	}
 
-	BinTree<DataType>* p_dest_tree = new BinTree<DataType>;
-	p_dest_tree->_root = p_node;
-	p_dest_tree->_size = p_node->size();
+	BinTree<DataType> dest_tree;
+	dest_tree._root = node;
+	dest_tree._size = size(node);
 	_begin = iterator(NULL);
 	_rear = iterator(NULL);	
-	_size -= p_dest_tree->_size;
+	_size -= dest_tree._size;
 
-	if(p_node == _root)
+	if(node == _root)
 	{
 		_root = NULL;
 	}
 	else
 	{
-		if(p_node->islchild())
+		if(islchild(node))
 		{
-			p_node->parent->lchild = NULL;
+			node->parent->lchild = NULL;
 		}
-		else if(p_node->isrchild())
+		else if(isrchild(node))
 		{
-			p_node->parent->rchild = NULL;
+			node->parent->rchild = NULL;
 		}
 	}
-	p_dest_tree->_root->parent = NULL;
+	dest_tree._root->parent = NULL;
 
-	return *p_dest_tree;
+	return dest_tree;
 }
 
+// 返回以 node 为根的子树
 template<class DataType>
-BinTree<DataType>& BinTree<DataType>::subtree(Node* p_node)
+BinTree<DataType> BinTree<DataType>::subtree(Node* node)
 {
-	if(!has_node(p_node))
-	{
-		cout << "Error in 'BinTree<DataType>& BinTree<DataType>::subtree(Node* p_node)'" << endl
-			 << "Current node is not in this tree!" << endl;
-		exit(-1);
-	}
+	check_node(node, "BinTree<DataType> BinTree<DataType>::subtree(Node* node)");
 
-	BinTree<DataType>* ptr_dest_tree = new BinTree<DataType>;
-	if(!ptr_dest_tree)
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-
-	ptr_dest_tree->_root = new_Node(p_node->data);
+	BinTree<DataType> dest_tree;
+	dest_tree._root = new_Node(node->data, node->height);
 
 	Node* src_node;
 	Node* dest_node;
 
-	Stack<Node*> src_stack, dest_stack;
-	src_stack.push(p_node);
-	dest_stack.push(ptr_dest_tree->_root);
+	Queue<Node*> src_queue, dest_queue;
+	src_queue.push(node);
+	dest_queue.push(dest_tree._root);
 
-	ptr_dest_tree->_size = 1;
-	while(!src_stack.empty())
+	dest_tree._size = 1;
+	while(!src_queue.empty())
 	{
-		src_node = src_stack.pop();
-		dest_node = dest_stack.pop();
+		src_node = src_queue.pop();
+		dest_node = dest_queue.pop();
 		if(src_node->rchild)
 		{
-			dest_node->rchild = new_Node(src_node->rchild->data, dest_node);
-			ptr_dest_tree->_size++;
-			src_stack.push(src_node->rchild);
-			dest_stack.push(dest_node->rchild);
+			dest_node->rchild = new_Node(src_node->rchild->data, src_node->rchild->height, dest_node);
+			dest_tree._size++;
+			src_queue.push(src_node->rchild);
+			dest_queue.push(dest_node->rchild);
 		}
 		if(src_node->lchild)
 		{
-			dest_node->lchild = new_Node(src_node->lchild->data, dest_node);
-			ptr_dest_tree->_size++;
-			src_stack.push(src_node->lchild);
-			dest_stack.push(dest_node->lchild);
+			dest_node->lchild = new_Node(src_node->lchild->data, src_node->lchild->height, dest_node);
+			dest_tree._size++;
+			src_queue.push(src_node->lchild);
+			dest_queue.push(dest_node->lchild);
 		}
 	}
 
-	return *ptr_dest_tree;
+	return dest_tree;
 }
 
 template<class DataType>
@@ -476,7 +601,7 @@ int BinTree<DataType>::size()const
 template<class DataType>
 int BinTree<DataType>::height()const
 {
-	return _root->height();
+	return _root->height;
 }
 
 template<class DataType>
@@ -486,14 +611,19 @@ bool BinTree<DataType>::empty()const
 }
 
 template<class DataType>
-bool BinTree<DataType>::has_node(Node* p_node)const
+bool BinTree<DataType>::has_node(const Node* node)const
 {
-	while(p_node->parent)
+	if(!node)
 	{
-		p_node = p_node->parent;
+		return false;
 	}
 
-	return (p_node == _root);
+	while(node->parent)
+	{
+		node = node->parent;
+	}
+
+	return (node == _root);
 }
 
 template<class DataType>
@@ -519,7 +649,7 @@ typename BinTree<DataType>::Node* BinTree<DataType>::insert_root(const DataType&
 {
 	if(_root)
 	{
-		cout << "Error in \'BinTree<DataType>::Node* BinTree<DataType>::insert_root(const DataType& value)\'" << endl
+		cout << "Error in 'BinTree<DataType>::Node* BinTree<DataType>::insert_root(const DataType& value)'" << endl
 			 << "Current tree already has root node." << endl;
 		exit(-1);
 	}
@@ -531,43 +661,46 @@ typename BinTree<DataType>::Node* BinTree<DataType>::insert_root(const DataType&
 template<class DataType>
 typename BinTree<DataType>::Node* BinTree<DataType>::insert_lchild(BinTree<DataType>::Node* node, const DataType& value)
 {
-	if(!has_node(node))
-	{
-		cout << "Error in \'BinTree<DataType>::Node* BinTree<DataType>::insert_lchild(BinTree<DataType>::Node* node, const DataType& value)\'" << endl
-			 << "node is not in current tree." << endl;
-		exit(-1);
-	}
+	check_node(node, "BinTree<DataType>::Node* BinTree<DataType>::insert_lchild(BinTree<DataType>::Node* node, const DataType& value)");
 
 	_size++;
-	return node->insert_lchild(value);
+	if(node->lchild)
+	{
+		cout << "Error when insert left child!" << endl
+			 << "Current node already has left child!" << endl;
+		exit(-1);
+	}
+	node->lchild = new_Node(value, 0, node);
+	update_height_above(node);
+
+	return node->lchild;
 }
 
 template<class DataType>
 typename BinTree<DataType>::Node* BinTree<DataType>::insert_rchild(BinTree<DataType>::Node* node, const DataType& value)
 {
-	if(!has_node(node))
-	{
-		cout << "Error in \'BinTree<DataType>::Node* BinTree<DataType>::insert_rchild(BinTree<DataType>::Node* node, const DataType& value)\'" << endl
-			 << "node is not in current tree." << endl;
-		exit(-1);
-	}
+	check_node(node, "BinTree<DataType>::Node* BinTree<DataType>::insert_rchild(BinTree<DataType>::Node* node, const DataType& value)");
 
 	_size++;
-	return node->insert_rchild(value);
+	if(node->rchild)
+	{
+		cout << "Error when insert right child!" << endl
+			 << "Current node already has right child!" << endl;
+		exit(-1);
+	}
+	node->rchild = new_Node(value, 0, node);
+	update_height_above(node);
+
+	return node->rchild;
 }
 
 template<class DataType>
 typename BinTree<DataType>::Node*
-BinTree<DataType>::attach_lchild(BinTree<DataType>::Node* p_node, const BinTree<DataType>& tree)
+BinTree<DataType>::attach_lchild(BinTree<DataType>::Node* node, const BinTree<DataType>& bintree)
 {
-	if(!has_node(p_node))
-	{
-		cout << "Error in \'BinTree<DataType>::Node* BinTree<DataType>::attach_lchild(BinTree<DataType>::Node* p_node, const BinTree<DataType>& tree)\'" << endl
-			 << "p_node is not in current tree." << endl;
-		exit(-1);
-	}
+	check_node(node, "BinTree<DataType>::attach_lchild(BinTree<DataType>::Node* node, const BinTree<DataType>& bintree)");
 
-	if(p_node->lchild)
+	if(node->lchild)
 	{
 		cout << "Error in 'BinTree<DataType>::Node*" << endl
 			 << "          BinTree<DataType>::attach_lchild(BinTree<DataType>::Node*," << endl
@@ -576,27 +709,24 @@ BinTree<DataType>::attach_lchild(BinTree<DataType>::Node* p_node, const BinTree<
 		exit(-1);
 	}
 
-	BinTree<DataType>* p_tree = new BinTree<DataType>(tree);
+	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(bintree);
+	check_ptr(ptr_bintree);
 
-	_size += p_tree->_size;
-	p_node->lchild = p_tree->_root;
-	p_tree->_root->parent = p_node;
+	_size += ptr_bintree->_size;
+	node->lchild = ptr_bintree->_root;
+	ptr_bintree->_root->parent = node;
+	update_height_above(node);
 
-	return p_tree->_root;
+	return ptr_bintree->_root;
 }
 
 template<class DataType>
 typename BinTree<DataType>::Node*
-BinTree<DataType>::attach_rchild(BinTree<DataType>::Node* p_node, const BinTree<DataType>& tree)
+BinTree<DataType>::attach_rchild(BinTree<DataType>::Node* node, const BinTree<DataType>& bintree)
 {
-	if(!has_node(p_node))
-	{
-		cout << "Error in \'BinTree<DataType>::Node* BinTree<DataType>::attach_rchild(BinTree<DataType>::Node* p_node, const BinTree<DataType>& tree)\'" << endl
-			 << "p_node is not in current tree." << endl;
-		exit(-1);
-	}
+	check_node(node, "BinTree<DataType>::attach_rchild(BinTree<DataType>::Node* node, const BinTree<DataType>& bintree)");
 
-	if(p_node->rchild)
+	if(node->rchild)
 	{
 		cout << "Error in 'BinTree<DataType>::Node*" << endl
 			 << "          BinTree<DataType>::attach_rchild(BinTree<DataType>::Node*," << endl
@@ -605,173 +735,15 @@ BinTree<DataType>::attach_rchild(BinTree<DataType>::Node* p_node, const BinTree<
 		exit(-1);
 	}
 
-	BinTree<DataType>* p_tree = new BinTree<DataType>(tree);
+	BinTree<DataType>* ptr_bintree = new BinTree<DataType>(bintree);
+	check_ptr(ptr_bintree);
 
-	_size += p_tree->_size;
-	p_node->rchild = p_tree->_root;
-	p_tree->_root->parent = p_node;
+	_size += ptr_bintree->_size;
+	node->rchild = ptr_bintree->_root;
+	ptr_bintree->_root->parent = node;
+	update_height_above(node);
 
-	return p_tree->_root;
-}
-
-template<class DataType>
-int BinTree<DataType>::write_part1(Stack<Node*>& stack_all, ofstream& file)const
-{
-	Node* p_node;
-	Stack<Node*> stack;
-	Stack<int> stack_name;
-
-	stack.push(_root);
-	stack_all.push(_root);
-	int node_name = 0;
-	stack_name.push(node_name);
-
-	while(!stack.empty())
-	{
-		p_node = stack.pop();
-		int current_name = stack_name.pop();
-		if(p_node && !(p_node->isleaf()) )
-		{
-			node_name++;
-			if(p_node->lchild)
-			{
-				file << "\t" << current_name << "->" << node_name << ";" << endl;
-			}
-			else
-			{
-				file << "\t" << current_name << "->NULL" << node_name << "[style=\"invis\"];" << endl;
-			}
-			stack.push(p_node->lchild);
-			stack_all.push(p_node->lchild);
-			stack_name.push(node_name);
-
-			node_name++;
-			if(p_node->rchild)
-			{
-				file << "\t" << current_name << "->" << node_name << ";" << endl;
-			}
-			else
-			{
-				file << "\t" << current_name << "->NULL" << node_name << "[style=\"invis\"];" << endl;
-			}
-			stack.push(p_node->rchild);
-			stack_all.push(p_node->rchild);
-			stack_name.push(node_name);
-		}
-	}
-
-	file << endl;
-	return node_name;
-}
-
-template<class DataType>
-void BinTree<DataType>::write_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const
-{
-	while(!stack_all.empty())
-	{
-		Node* p_node = stack_all.pop();
-		if(!p_node)
-		{
-			file << "	NULL" << node_name-- << "[shape=\"circle\",label=\"A\",style=\"invis\"];" << endl;
-		}
-		else
-		{
-			file << "\t" << node_name-- << "[shape=\"circle\",label=\"" << p_node->data << "\"];" << endl;
-		}
-	}
-}
-
-template<class DataType>
-void BinTree<DataType>::write_content_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const
-{
-	while(!stack_all.empty())
-	{
-		Node* p_node = stack_all.pop();
-		if(!p_node)
-		{
-			file << "	NULL" << node_name-- << "[shape=\"circle\",label=\"A\",style=\"invis\"];" << endl;
-		}
-		else
-		{
-			file << "\t" << node_name-- << "[shape=\"circle\",label=\"" << *(p_node->data) << "\"];" << endl;
-		}
-	}
-}
-
-template<class DataType>
-void BinTree<DataType>::write(const string& filename)const
-{
-	if(empty())
-	{
-		cout << "The tree is empty, nothing to write!" << endl;
-		return;
-	}
-
-	ofstream file("Figures/bintree.dot");
-	file << "digraph BinTree" << endl
-		 <<	"{" << endl;
-		 
-	Stack<Node*> stack_all;
-
-	int node_name = write_part1(stack_all, file);
-	write_part2(stack_all, node_name, file);
-
-	file << "}" << endl;
-	file.close();
-	string cmd = "dot Figures/bintree.dot | gvpr -c -f Figures/binarytree.gvpr | neato -n -Tpdf -o Figures/" + filename;
-	system(cmd.data());
-}
-
-template<class DataType>
-void BinTree<DataType>::write_content(const string& filename)const
-{
-	if(empty())
-	{
-		cout << "The tree is empty, nothing to write!" << endl;
-		return;
-	}
-
-	ofstream file("Figures/bintree.dot");
-	file << "digraph BinTree" << endl
-		 <<	"{" << endl;
-		 
-	Stack<Node*> stack_all;
-
-	int node_name = write_part1(stack_all, file);
-	write_content_part2(stack_all, node_name, file);
-
-	file << "}" << endl;
-	file.close();
-	string cmd = "dot Figures/bintree.dot | gvpr -c -f Figures/binarytree.gvpr | neato -n -Tpdf -o Figures/" + filename;
-	system(cmd.data());
-}
-
-template<class DataType>
-void BinTree<DataType>::show(const string& filename)const
-{
-	if(empty())
-	{
-		cout << "The tree is empty, nothing to show!" << endl;
-		return;
-	}
-
-	write(filename);
-	string cmd = "start sumatrapdf Figures/" + filename;
-	system(cmd.data());
-}
-
-template<class DataType>
-void BinTree<DataType>::show_content(const string& filename)const
-{
-	if(empty())
-	{
-		cout << "The tree is empty, nothing to show!" << endl;
-		return;
-	}
-
-	write_content(filename);
-	string cmd = "start sumatrapdf Figures/" + filename;
-	system(cmd.data());
+	return ptr_bintree->_root;
 }
 
 template<class DataType>
@@ -862,7 +834,7 @@ void BinTree<DataType>::trav_method(TravType method)
 template<class DataType>
 typename BinTree<DataType>::Node* BinTree<DataType>::trav_left_branch(Node* node, Stack<Node*>& stack)
 {
-	while( !(node->isleaf()) )
+	while(!isleaf(node))
 	{
 		if(node->lchild)
 		{
@@ -917,7 +889,7 @@ void BinTree<DataType>::gotoHLVFL(Stack<Node*>& stack)
 	}
 
 	Node* node = stack.top();
-	while( !(node->isleaf()) )
+	while(!isleaf(node))
 	{
 		if(node->rchild)
 		{
@@ -1063,5 +1035,5 @@ void BinTree<DataType>::trav_level()
 		queue.front()->prev = node;
 	}
 }
-
+#include <draw.cpp>
 #endif

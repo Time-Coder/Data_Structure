@@ -1,36 +1,36 @@
 #ifdef TREE_H
 
 template<class DataType>
-int Tree<DataType>::Node::size()const
+int Tree<DataType>::size(const Node* node)
 {
-	if(isleaf())
+	if(!node)
 	{
-		return 1;
+		return 0;
 	}
 
 	int n = 1;
-	for(typename List<Node*>::iterator it = children.begin(); it != children.end(); it++)
+	for(typename List<Node*>::iterator it = node->children.begin(); it != node->children.end(); it++)
 	{
-		n += (*it)->size();
+		n += size(*it);
 	}
 	return n;
 }
 
 template<class DataType>
-int Tree<DataType>::Node::height()const
+int Tree<DataType>::height(const Node* node)
 {
-	if(isleaf())
+	if(!node)
 	{
-		return 0;
+		return -1;
 	}
 
-	typename List<Node*>::iterator it = children.begin();
-	int h = (*it)->height();
+	typename List<Node*>::iterator it = node->children.begin();
+	int h = height(*it);
 	it++;
 
-	for(; it != children.end(); it++)
+	for(; it != node->children.end(); it++)
 	{
-		int h_temp = (*it)->height();
+		int h_temp = height(*it);
 		if(h_temp > h)
 		{
 			h = h_temp;
@@ -40,37 +40,28 @@ int Tree<DataType>::Node::height()const
 }
 
 template<class DataType>
-int Tree<DataType>::Node::level()const
+int Tree<DataType>::depth(const Node* node)
 {
-	if(isroot())
+	int d = -1;
+	while(node)
 	{
-		return 0;
-	}
-	return parent->level() + 1;
-}
-
-template<class DataType>
-bool Tree<DataType>::Node::isleaf()const
-{
-	return children.empty();
-}
-
-template<class DataType>
-bool Tree<DataType>::Node::isroot()const
-{
-	return !parent;
-}
-
-template<class DataType>
-bool Tree<DataType>::Node::belong_to(const Tree<DataType>& tree)const
-{
-	const Node* node = this;
-	while(node->parent)
-	{
+		d++;
 		node = node->parent;
 	}
 
-	return (node == tree._root);
+	return d;
+}
+
+template<class DataType>
+bool Tree<DataType>::isleaf(const Node* node)
+{
+	return node && node->children.empty();
+}
+
+template<class DataType>
+bool Tree<DataType>::isroot(const Node* node)
+{
+	return node && !(node->parent);
 }
 
 template<class DataType>
@@ -78,14 +69,6 @@ typename Tree<DataType>::Node* Tree<DataType>::Node::append_child(const DataType
 {
 	Node* node = new_Node(value, this);
 	children.push_back(node);
-	return node;
-}
-
-template<class DataType>
-typename Tree<DataType>::Node* Tree<DataType>::Node::insert_child(int i, const DataType& value)
-{
-	Node* node = new_Node(value, this);
-	children.insert(i, node);
 	return node;
 }
 
@@ -103,7 +86,7 @@ typename Tree<DataType>::Node* Tree<DataType>::new_Node(const DataType& value, N
 }
 
 template<class DataType>
-Tree<DataType>::Tree(const Tree<DataType>& tree)
+void Tree<DataType>::copy_from(const Tree<DataType>& tree)
 {
 	if(!(tree._root))
 	{
@@ -112,24 +95,36 @@ Tree<DataType>::Tree(const Tree<DataType>& tree)
 
 	_root = new_Node(tree._root->data);
 
-	Stack<Node*> src_stack, dest_stack;
-	src_stack.push(tree._root);
-	dest_stack.push(_root);
+	Queue<Node*> src_queue, dest_queue;
+	src_queue.push(tree._root);
+	dest_queue.push(_root);
 
-	while(!src_stack.empty())
+	while(!src_queue.empty())
 	{
-		Node* src_node = src_stack.pop();
-		Node* dest_node = dest_stack.pop();
+		Node* src_node = src_queue.pop();
+		Node* dest_node = dest_queue.pop();
 		typename List<Node*>::iterator it;
 		for(it = src_node->children.begin(); it != src_node->children.end(); it++)
 		{
 			Node* node_temp = new_Node((*it)->data, dest_node);
 			dest_node->children.push_back(node_temp);
-			src_stack.push(*it);
-			dest_stack.push(node_temp);
+			src_queue.push(*it);
+			dest_queue.push(node_temp);
 		}
 	}
 	_size = tree._size;
+}
+
+template<class DataType>
+Tree<DataType>::Tree(const Tree<DataType>& tree)
+{
+	copy_from(tree);
+}
+
+template<class DataType>
+Tree<DataType>::Tree(Tree<DataType>&& tree)
+{
+	*this = move(tree);
 }
 
 template<class DataType>
@@ -144,34 +139,34 @@ Tree<DataType>::Tree(const BinTree<DataType>& bintree)
 	{
 		cout << "Error when converting Binary Tree to General Tree." << endl
 			 << "Current binary tree's root node has right child!" << endl;
-		exit(-1);
+		exit(-3);
 	}
 
 	_root = new_Node(bintree.root()->data);
-	Stack<Node*> dest_stack;
-	Stack< typename BinTree<DataType>::Node* > src_stack;
+	Queue<Node*> dest_queue;
+	Queue< typename BinTree<DataType>::Node* > src_queue;
 
-	dest_stack.push(_root);
-	src_stack.push(bintree.root());
+	dest_queue.push(_root);
+	src_queue.push(bintree.root());
 
-	while(!src_stack.empty())
+	while(!src_queue.empty())
 	{
-		Node* dest_node = dest_stack.pop();
-		auto src_node = src_stack.pop();
+		Node* dest_node = dest_queue.pop();
+		auto src_node = src_queue.pop();
 		if(src_node->lchild)
 		{
 			src_node = src_node->lchild;
 			Node* dest_child_node = new_Node(src_node->data, dest_node);
 			dest_node->children.push_back(dest_child_node);
-			dest_stack.push(dest_child_node);
-			src_stack.push(src_node);
+			dest_queue.push(dest_child_node);
+			src_queue.push(src_node);
 			while(src_node->rchild)
 			{
 				src_node = src_node->rchild;
 				dest_child_node = new_Node(src_node->data, dest_node);
 				dest_node->children.push_back(dest_child_node);
-				dest_stack.push(dest_child_node);
-				src_stack.push(src_node);
+				dest_queue.push(dest_child_node);
+				src_queue.push(src_node);
 			}
 		}
 	}
@@ -180,7 +175,7 @@ Tree<DataType>::Tree(const BinTree<DataType>& bintree)
 }
 
 template<class DataType>
-Forest<DataType>::Forest(BinTree<DataType> bintree)
+Forest<DataType>::Forest(const BinTree<DataType>& bintree)
 {
 	typename BinTree<DataType>::Node* node = NULL;
 
@@ -197,107 +192,41 @@ Forest<DataType>::Forest(BinTree<DataType> bintree)
 }
 
 template<class DataType>
-void ptr_check(DataType*& ptr)
+bool Tree<DataType>::has_node(const Node& node)const
+{
+	auto p_node = &node;
+	while(p_node->parent)
+	{
+		p_node = p_node->parent;
+	}
+
+	return (p_node == _root);
+}
+
+template<class DataType>
+bool Tree<DataType>::has_node(Node* node)const
+{
+	if(!node)
+	{
+		return false;
+	}
+
+	while(node->parent)
+	{
+		node = node->parent;
+	}
+	return (node == _root);
+}
+
+template<class DataType>
+template<class ElemType>
+void Tree<DataType>::check_ptr(const ElemType* ptr)
 {
 	if(!ptr)
 	{
 		cerr << "Failed to allocate memory!" << endl;
 		exit(-1);
 	}
-}
-
-template<class DataType>
-BinTree<DataType*>& Tree<DataType>::toBinTree()const
-{
-	BinTree<DataType*>* ptr_bintree = new BinTree<DataType*>;
-	if(empty())
-	{
-		return *ptr_bintree;
-	}
-
-	ptr_bintree->_root = new typename BinTree<DataType*>::Node(&(_root->data));
-	ptr_check(ptr_bintree->_root);
-
-	Stack<Node*> src_stack;
-	Stack<typename BinTree<DataType*>::Node*> dest_stack;
-
-	src_stack.push(_root);
-	dest_stack.push(ptr_bintree->_root);
-
-	while(!src_stack.empty())
-	{
-		Node* src_node = src_stack.pop();
-		auto dest_node = dest_stack.pop();
-
-		if(src_node->children.empty())
-		{
-			continue;
-		}
-
-		auto it = src_node->children.begin();
-		dest_node->lchild = new typename BinTree<DataType*>::Node(&(_root->data), dest_node);
-		ptr_check(dest_node->lchild);
-		
-		dest_node = dest_node->lchild;
-
-		dest_stack.push(dest_node);
-		src_stack.push(*it);
-
-		it++;
-		for(; it != src_node->children.end(); it++)
-		{
-			dest_node->rchild = new typename BinTree<DataType*>::Node(&((*it)->data), dest_node);
-			ptr_check(dest_node->rchild);
-
-			dest_node = dest_node->rchild;
-			dest_stack.push(dest_node);
-			src_stack.push(*it);
-		}
-	}
-	ptr_bintree->_size = _size;
-
-	return *ptr_bintree;
-}
-
-template<class DataType>
-BinTree<DataType*>& Forest<DataType>::toBinTree()const
-{
-	BinTree<DataType*>* ptr_main_bintree;
-	if(this->empty())
-	{
-		ptr_main_bintree = new BinTree<DataType*>;
-		ptr_check(ptr_main_bintree);
-		return *ptr_main_bintree;
-	}
-
-	auto it = this->begin();
-	BinTree<DataType*>* ptr_bintree = new BinTree<DataType*>(it->toBinTree());
-	if(!ptr_bintree)
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-
-	ptr_main_bintree = ptr_bintree;
-	typename BinTree<DataType*>::Node* node = ptr_main_bintree->root();
-
-	it++;
-	for(; it != this->end(); it++)
-	{
-		ptr_bintree = new BinTree<DataType*>(it->toBinTree());
-		if(!ptr_bintree)
-		{
-			cerr << "Failed to allocate memory!" << endl;
-			exit(-1);
-		}
-
-		node->rchild = ptr_bintree->_root;
-		ptr_bintree->_root->parent = node;
-		node = node->rchild;
-		ptr_main_bintree->_size += ptr_bintree->_size;
-	}
-
-	return *ptr_main_bintree;
 }
 
 template<class DataType>
@@ -314,14 +243,14 @@ void Tree<DataType>::clear()
 		return;
 	}
 
-	Stack<Node*> stack;
-	stack.push(_root);
-	while(!stack.empty())
+	Queue<Node*> queue;
+	queue.push(_root);
+	while(!queue.empty())
 	{
-		Node* node = stack.pop();
+		Node* node = queue.pop();
 		while(!(node->children.empty()))
 		{
-			stack.push(node->children.pop_back());
+			queue.push(node->children.pop_back());
 		}
 		delete node;
 	}
@@ -357,7 +286,7 @@ bool Tree<DataType>::bad_node(Node* node, const string& message, const string& f
 			 << "Nothing has been done and return NULL" << endl;
 		return true;
 	}
-	if(!(node->belong_to(*this)))
+	if(!(this->has_node(node)))
 	{
 		cout << message << " in '" << function_name << "'" << endl
 			 << "Current Tree dosen't have this node!" << endl
@@ -466,42 +395,52 @@ int Tree<DataType>::remove(Node* node)
 		return 0;
 	}
 
+	// 定义局部变量 tree，函数返回时，局部变量自动销毁
 	Tree<DataType> tree;
-	tree._root = new Node(*node);
-	if(!(tree._root))
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-	tree._size = tree._root->size();
+	tree._root = node;
+	tree._size = size(tree._root);
 	_size -= tree._size;
 
-	node->parent->children.erase(node->parent->children.find(node));
+	if(node == _root)
+	{
+		_root = NULL;
+	}
+	else
+	{
+		node->parent->children.erase(node->parent->children.find(node));
+		node->parent = NULL;
+	}
+	
 	return tree._size;
 }
 
 template<class DataType>
-Tree<DataType>& Tree<DataType>::secede(Node* node)
+Tree<DataType> Tree<DataType>::secede(Node* node)
 {
-	if(bad_node(node, "Error", "Tree<DataType>& Tree<DataType>::secede(Node* node)"))
+	if(bad_node(node, "Error", "Tree<DataType> Tree<DataType>::secede(Node* node)"))
 	{
 		exit(-1);
 	}
 
-	Tree<DataType> *tree;
-	tree->_root = new Node(*node);
-	if(!(tree->_root))
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-	tree->_root->parent = NULL;
-	tree->_size = tree->_root->size();
+	// 定义局部变量 tree，函数返回时，若调用处没有变量接受返回值，该局部变量自动销毁；
+	// 反之，该局部变量从逻辑上转移到被调用处的空间（内存上位置没有改变，没有调用拷贝构造函数或是移动构造函数），
+	// 并在那里函数结束后被销毁。
+	Tree<DataType> tree;
+	tree._root = node;
+	tree._size = size(tree._root);
 	_size -= tree->_size;
 
-	node->parent->children.erase(node->parent->children.find(node));
+	if(node == _root)
+	{
+		_root = NULL;
+	}
+	else
+	{
+		node->parent->children.erase(node->parent->children.find(node));
+		node->parent = NULL;
+	}
 
-	return *tree;
+	return tree;
 }
 
 template<class DataType>
@@ -514,15 +453,9 @@ Tree<DataType> Tree<DataType>::subtree(Node* node)
 		exit(-1);
 	}
 
-	Tree<DataType> *tree;
-	tree->_root = new Node(*node);
-	if(!(tree->_root))
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-	tree->_root->parent = NULL;
-	tree->_size = tree->_root->size();
+	Tree<DataType> *tree = new Tree<DataType>;
+	tree->_root = node;
+	tree->_size = size(tree->_root);
 
 	return *tree;
 }
@@ -530,10 +463,26 @@ Tree<DataType> Tree<DataType>::subtree(Node* node)
 template<class DataType>
 Tree<DataType>& Tree<DataType>::operator =(const Tree<DataType>& tree)
 {
-	clear();
-	Tree<DataType> *ptr_tree = new Tree<DataType>(tree);
-	_root = ptr_tree->_root;
-	_size = tree._size;
+	if(this != &tree)
+	{
+		clear();
+		copy_from(tree);
+	}
+	
+	return *this;
+}
+
+template<class DataType>
+Tree<DataType>& Tree<DataType>::operator =(Tree<DataType>&& tree)
+{
+	if(this != &tree)
+	{
+		clear();
+		_root = move(tree._root);
+		_size = move(tree._size);
+		tree._root = NULL;
+		tree._size = 0;
+	}
 
 	return *this;
 }
@@ -542,17 +491,8 @@ template<class DataType>
 Tree<DataType>& Tree<DataType>::operator =(const BinTree<DataType>& bintree)
 {
 	clear();
-	Tree<DataType>& ptr_tree = new Tree<DataType>(bintree);
-	if(!ptr_tree)
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-
-	_root = ptr_tree->_root;
-	_size = ptr_tree->_size;
-
-	return *this;
+	Tree<DataType> tree(bintree);
+	return *this = move(tree);
 }
 
 template<class DataType>
@@ -675,19 +615,8 @@ template<class DataType>
 Forest<DataType>& Forest<DataType>::operator =(const BinTree<DataType>& bintree)
 {
 	this->clear();
-
-	Forest<DataType>* ptr_forest = new Forest<DataType>(bintree);
-	if(!ptr_forest)
-	{
-		cerr << "Failed to allocate memory!" << endl;
-		exit(-1);
-	}
-
-	this->head = ptr_forest->head;
-	this->_rear = ptr_forest->_rear;
-	this->length = ptr_forest->length;
-
-	return *this;
+	Forest<DataType> forest(bintree);
+	return *this = move(forest);
 }
 
 template<class DataType>

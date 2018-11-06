@@ -5,7 +5,6 @@
 #include <fstream>
 
 #include <list.h>
-#include <stack.h>
 #include <bintree.h>
 
 using namespace std;
@@ -40,11 +39,7 @@ public:
 		Node(const DataType& _data, Node *_parent = NULL) :
 		data(_data), parent(_parent){}
 		~Node(){parent = NULL;}
-		int size()const;
-		int height()const;
-		int level()const;
-		bool isleaf()const;
-		bool isroot()const;
+		
 		bool belong_to(const Tree<DataType>& tree)const;
 		Node* append_child(const DataType& value);
 		Node* insert_child(int i, const DataType& value);
@@ -58,6 +53,9 @@ private:
 	static Node* new_Node(const DataType& value, Node* parent = NULL);
 	bool bad_node(Node* node, const string& message, const string& function_name);
 
+	template<class ElemType>
+	static void check_ptr(const ElemType* ptr);
+
 public:
 	void write_part1(Stack<Node*>& stack_node2, Stack<int>& stack_number2, int n, ofstream& file)const;
 	void write_part2(Stack<Node*>& stack_node2, Stack<int>& stack_number2, ofstream& file)const;
@@ -65,21 +63,22 @@ public:
 
 public:
 	Tree(){}
-	Tree(const Tree<DataType>& tree); // finished
-	Tree(const BinTree<DataType>& bintree); // finished
+	Tree(const Tree<DataType>& tree);
+	Tree(Tree<DataType>&& tree);
+	Tree(const BinTree<DataType>& bintree);
 	~Tree();
+	
+	Tree<DataType>& operator =(const Tree<DataType>& tree);
+	Tree<DataType>& operator =(Tree<DataType>&& tree);
+	Tree<DataType>& operator =(const BinTree<DataType>& bintree);
 
-	Tree<DataType>& operator =(const Tree<DataType>& tree); // finished
-	Tree<DataType>& operator =(const BinTree<DataType>& tree); // finished
-
-	BinTree<DataType*>& toBinTree()const;
-
+	void copy_from(const Tree<DataType>& tree);
 	void clear();
 	int size()const{return _size;}
-	int height()const{return _root->height();}
+	int height()const{return height(_root);}
 	bool empty()const{return !_root;}
-	bool has_node(const Node& node)const{return node.belong_to(*this);}
-	bool has_node(Node* node)const{return node->belong_to(*this);}
+	bool has_node(const Node& node)const;
+	bool has_node(Node* node)const;
 	Node* root()const{return _root;}
 
 	Node* insert_root(const DataType& value);
@@ -89,13 +88,19 @@ public:
 	Node* attach(Node* node, int i, const Tree<DataType>& tree);
 
 	int remove(Node* node);
-	Tree<DataType>& secede(Node* node);
+	Tree<DataType> secede(Node* node);
 	Tree<DataType> subtree(Node* node);
 
 	void show(const string& filename = "Tree")const;
 	void show_content(const string& filename = "Tree")const;
 	void write(const string& filename)const;
 	void write_content(const string& filename)const;
+
+	static int size(const Node* node);
+	static int height(const Node* node);
+	static int depth(const Node* node);
+	static bool isleaf(const Node* node);
+	static bool isroot(const Node* node);
 };
 
 template<class DataType>
@@ -112,10 +117,9 @@ public:
 	Forest(const Forest<DataType>& forest) : List< Tree<DataType> >(forest) {}
 	Forest(int n, const Tree<DataType>& tree) : List< Tree<DataType> >(n, tree) {}
 	Forest(int n) : List< Tree<DataType> >(n) {}
-	Forest(BinTree<DataType> bintree); // finished
+	Forest(const BinTree<DataType>& bintree);
 
 	Forest<DataType>& operator =(const BinTree<DataType>& bintree);
-	BinTree<DataType*>& toBinTree()const;
 
 	void show(const string& filename = "Forest")const;
 	void show_content(const string& filename = "Forest")const;

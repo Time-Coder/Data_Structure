@@ -13,10 +13,13 @@ DEPEND := ../../List/List/list.h		../../List/List/list.cpp \
 all: main
 
 main: $(DEPEND)
-	g++ -std=c++11 $(INCLUDE) main.cpp -o main
+	g++ -g -std=c++11 $(INCLUDE) main.cpp -o main
 
 run: main
 	main
 
 clean:
 	del main.exe
+
+gdb:
+	gdb -q main.exe

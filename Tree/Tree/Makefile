@@ -13,4 +13,4 @@ run: main
 	main.exe
 
 gdb: main
-	gdb -q main.exe
+	gdb -q --interpreter=mi --args main.exe

@@ -3,12 +3,18 @@
 
 #include <iostream>
 #include <fstream>
+#include <typeinfo>
+#include <string.h>
+#include <direct.h>
 
 #include <stack.h>
 #include <queue.h>
 #include <tree.h>
 
 using namespace std;
+
+#define is_ptr(type) (is_pointer<type>::value)
+#define type_equal(type1, type2) ( is_same<type1, type2>::value )
 
 template<class DataType>
 class Tree;
@@ -32,29 +38,28 @@ public:
 	public:
 		DataType data;
 
+		int height = 0;
+		int color = 0;
+
 		Node *parent = NULL;
 		Node *lchild = NULL;
 		Node *rchild = NULL;
 
 		Node *next = NULL;
 		Node *prev = NULL;
+
+		int x0 = 0;
+		int y0 = 0;
 	
 	public:
 		Node(){}
-		Node(const DataType& _data, Node *_parent = NULL, Node *_lchild = NULL, Node *_rchild = NULL) :
-		data(_data), parent(_parent), lchild(_lchild), rchild(_rchild){}
-		~Node(){parent = NULL; lchild = NULL; rchild = NULL;}
-		int size()const;
-		int height()const;
-		int level()const;
-		bool isleaf()const;
-		bool isroot()const;
-		bool islchild()const;
-		bool isrchild()const;
-		Node* brother()const;
-		bool belong_to(const BinTree<DataType>& tree)const;
-		Node* insert_lchild(const DataType& value);
-		Node* insert_rchild(const DataType& value);
+		Node(const DataType& _data,
+			 int _height = 0,
+			 Node *_parent = NULL,
+			 Node *_lchild = NULL,
+			 Node *_rchild = NULL) :
+		data(_data), height(_height), parent(_parent), lchild(_lchild), rchild(_rchild){}
+		~Node(){height = 0; parent = NULL; lchild = NULL; rchild = NULL; next = NULL; prev = NULL;}
 	};
 
 	class iterator
@@ -79,7 +84,7 @@ public:
 		DataType* operator ->(){return &(_ptr->data);}
 	};
 
-private:
+protected:
 	Node *_root = NULL;
 	int _size = 0;
 
@@ -87,16 +92,13 @@ private:
 	iterator _rear = iterator(NULL);
 	iterator _end = iterator(NULL);
 
-private:
+protected:
 	static Node* new_Node(const DataType& value,
+						  int height = 0,
 						  Node* parent = NULL,
 						  Node* lchild = NULL,
 						  Node* rchild = NULL); // finished
 	void copy(BinTree<DataType>& dest_tree, const BinTree<DataType>& src_tree); // finished
-
-	int write_part1(Stack<Node*>& stack_all, ofstream& file)const;
-	void write_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const;
-	void write_content_part2(Stack<Node*>& stack_all, int node_name, ofstream& file)const;
 
 	static Node* trav_left_branch(Node* node, Stack<Node*>& stack);
 	void trav_pre();
@@ -110,23 +112,50 @@ private:
 
 	void trav_level();
 
+	static int height(const Node* node);
+	static void update_height(Node* node);
+	static void update_height_above(Node* node);
+	static void update_height_below(Node* node);
+
+	template<class ElemType>
+	static void check_ptr(const ElemType* ptr);
+	void check_node(const Node* node, const char* function_name);
+
+	template<class ElemType>
+	static void circle(ofstream& file, int x0, int y0, const ElemType& label, const string& face_color, const string& font_color);
+	static void connect(ofstream& file, int x1, int y1, int x2, int y2);
+
 public:
 	BinTree(){}
-	BinTree(const BinTree<DataType>& tree); // finished
-	BinTree(const Tree<DataType>& tree); // finished
-	BinTree(const Forest<DataType>& forest); // finished
+	BinTree(const BinTree<DataType>& bintree);
+	BinTree(BinTree<DataType>&& bintree);
+	BinTree(const Tree<DataType>& tree);
+	BinTree(const Forest<DataType>& forest);
 	~BinTree();
 
-	BinTree<DataType>& operator =(const BinTree<DataType>& tree); // finished
-	BinTree<DataType>& operator =(const Tree<DataType>& tree); // finished
-	BinTree<DataType>& operator =(const Forest<DataType>& forest); // finished
+	template<class ElemType>
+	BinTree(const Forest<ElemType>* forest);
+	template<class ElemType>
+	BinTree(const Tree<ElemType>* tree);
+
+	BinTree<DataType>& operator =(const BinTree<DataType>& bintree);
+	BinTree<DataType>& operator =(BinTree<DataType>&& bintree);
+	BinTree<DataType>& operator =(const Tree<DataType>& tree);
+	BinTree<DataType>& operator =(const Forest<DataType>& forest);
+
+	template<class ElemType>
+	BinTree<DataType>& operator =(const Tree<ElemType>* tree);
+	template<class ElemType>
+	BinTree<DataType>& operator =(const Forest<ElemType>* forest);
+
+	void copy_from(const BinTree<DataType>& bintree);
 
 	void clear();
 	int size()const;
 	int height()const;
 	bool empty()const;
 	bool has_node(const Node& node)const;
-	bool has_node(Node* node)const;
+	bool has_node(const Node* node)const;
 	Node* root()const;
 
 	Node* insert_root(const DataType& value);
@@ -135,19 +164,26 @@ public:
 	Node* attach_lchild(Node* node, const BinTree<DataType>& tree);
 	Node* attach_rchild(Node* node, const BinTree<DataType>& tree);
 	int remove(Node* node);
-	BinTree<DataType>& secede(Node* node);
-	static BinTree<DataType>& subtree(Node* node);
+	BinTree<DataType> secede(Node* node);
+	static BinTree<DataType> subtree(Node* node);
 
-	void show(const string& filename = "BinTree")const;
-	void show_content(const string& filename = "BinTree")const;
-	void write(const string& filename)const;
-	void write_content(const string& filename)const;
+	void show(const string& title = "Tree");
+	void show_content(const string& title = "Tree");
 
 	void trav_method(TravType method);
 	iterator begin()const;
 	iterator rear()const;
 	iterator end()const;
+
+	static int size(const Node* node);
+	static int depth(const Node* node);
+	static bool isleaf(const Node* node);
+	static bool isroot(const Node* node);
+	static bool islchild(const Node* node);
+	static bool isrchild(const Node* node);
+	Node*& branch(Node*& node);
+	static Node*& brother(Node*& node);
 };
 
-#include "bintree.cpp"
+#include <bintree.cpp>
 #endif
